@@ -55116,7 +55116,7 @@ Starts the usertax MCP server on standard input and output, for AI assistants su
 Code. Tools: measure, compare, explain_package, alternatives. Relative paths are resolved against
 the directory the server was started in. Example configuration:
 
-  { "mcpServers": { "usertax": { "command": "npx", "args": ["-y", "usertax", "mcp"] } } }
+  { "mcpServers": { "usertax": { "command": "npx", "args": ["-y", "@usertax/cli", "mcp"] } } }
 `;
 async function mcpCommand(argv, io, options, transport) {
   if (argv.includes("--help") || argv.includes("-h")) {
@@ -55142,7 +55142,7 @@ async function mcpCommand(argv, io, options, transport) {
 }
 
 // ../cli/dist/version.js
-var VERSION = true ? "0.1.2" : createRequire(import.meta.url)("../package.json").version;
+var VERSION = true ? "0.1.3" : createRequire(import.meta.url)("../package.json").version;
 
 // ../cli/dist/index.js
 var version2 = VERSION;

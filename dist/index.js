@@ -44784,7 +44784,6 @@ function createReport(options) {
 }
 
 // ../cli/dist/index.js
-import { createRequire as createRequire2 } from "node:module";
 import { parseArgs as parseArgs3 } from "node:util";
 
 // ../cli/dist/commands/diff.js
@@ -55142,9 +55141,11 @@ async function mcpCommand(argv, io, options, transport) {
   return EXIT.ok;
 }
 
+// ../cli/dist/version.js
+var VERSION = true ? "0.1.0" : createRequire(import.meta.url)("../package.json").version;
+
 // ../cli/dist/index.js
-var require2 = createRequire2(import.meta.url);
-var { version: version2 } = require2("../package.json");
+var version2 = VERSION;
 var HELP = `usertax ${version2}
 What does this pull request cost your users?
 

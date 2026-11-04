@@ -55142,7 +55142,7 @@ async function mcpCommand(argv, io, options, transport) {
 }
 
 // ../cli/dist/version.js
-var VERSION = true ? "0.1.3" : createRequire(import.meta.url)("../package.json").version;
+var VERSION = true ? "0.1.4" : createRequire(import.meta.url)("../package.json").version;
 
 // ../cli/dist/index.js
 var version2 = VERSION;

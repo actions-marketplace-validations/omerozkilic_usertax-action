@@ -10320,7 +10320,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve9.call(this, root, ref);
+      let _sch = resolve11.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
         const { schemaId } = this.opts;
@@ -10347,7 +10347,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve9(root, ref) {
+    function resolve11(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -11211,7 +11211,7 @@ var require_fast_uri = __commonJS({
       }
       return uri;
     }
-    function resolve9(baseURI, relativeURI, options) {
+    function resolve11(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -11602,7 +11602,7 @@ var require_fast_uri = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize: normalize2,
-      resolve: resolve9,
+      resolve: resolve11,
       resolveComponent,
       equal,
       serialize,
@@ -14592,8 +14592,8 @@ var require_dist2 = __commonJS({
 });
 
 // src/run.ts
-import { readFile as readFile8, stat as stat7 } from "node:fs/promises";
-import { resolve as resolve8 } from "node:path";
+import { readFile as readFile9, stat as stat8 } from "node:fs/promises";
+import { resolve as resolve10 } from "node:path";
 
 // ../core/dist/data/alternatives.json
 var alternatives_default = {
@@ -26717,7 +26717,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve9) {
+function isRecursive(inst, stack, resolve11) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -26727,7 +26727,7 @@ function isRecursive(inst, stack, resolve9) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve9);
+      const answer = isRecursive(child, stack, resolve11);
       if (answer > result)
         result = answer;
     }
@@ -26738,7 +26738,7 @@ function isRecursive(inst, stack, resolve9) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve9) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve11) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -26802,7 +26802,7 @@ function isRecursive(inst, stack, resolve9) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve9 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve11 ? inst._zod.innerType : void 0);
       merge2(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -43336,7 +43336,7 @@ function assignKeys(files) {
 
 // ../measure/dist/lockfile/index.js
 import { readFile as readFile3, readdir as readdir2 } from "node:fs/promises";
-import { dirname, join as join4, relative, resolve as resolve3, sep } from "node:path";
+import { dirname, join as join4, relative, resolve as resolve4, sep } from "node:path";
 
 // ../measure/dist/lockfile/graph.js
 var LockfileError = class extends Error {
@@ -43394,13 +43394,142 @@ function dependenciesOf(graph, importerPath) {
   })).sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
 }
 
+// ../measure/dist/lockfile/bun.js
+function stripTrailingCommas(text2) {
+  let out = "";
+  let inString = false;
+  for (let i = 0; i < text2.length; i += 1) {
+    const char = text2[i];
+    if (inString) {
+      out += char;
+      if (char === "\\") {
+        out += text2[i + 1] ?? "";
+        i += 1;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+    } else if (char === ",") {
+      let j = i + 1;
+      while (j < text2.length && /\s/.test(text2[j]))
+        j += 1;
+      if (text2[j] === "}" || text2[j] === "]")
+        continue;
+    }
+    out += char;
+  }
+  return out;
+}
+function keySegments(key) {
+  const parts = key.split("/");
+  const segments = [];
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.startsWith("@") && i + 1 < parts.length) {
+      segments.push(`${part}/${parts[i + 1]}`);
+      i += 1;
+    } else {
+      segments.push(part);
+    }
+  }
+  return segments;
+}
+function parseResolution(resolution) {
+  const at = resolution.indexOf("@", 1);
+  if (at === -1)
+    return { name: resolution, version: "" };
+  return { name: resolution.slice(0, at), version: resolution.slice(at + 1) };
+}
+function resolutionOf(entry) {
+  const first = entry?.[0];
+  return typeof first === "string" ? first : "";
+}
+function resolve2(packages, scope, name) {
+  const segments = scope === "" ? [] : keySegments(scope);
+  for (let length = segments.length; length >= 0; length -= 1) {
+    const candidate = [...segments.slice(0, length), name].join("/");
+    if (candidate in packages)
+      return candidate;
+  }
+  return void 0;
+}
+function parseBunLock(text2) {
+  let lock;
+  try {
+    lock = JSON.parse(stripTrailingCommas(text2));
+  } catch {
+    throw new LockfileError("bun.lock is not valid JSON");
+  }
+  if (lock.workspaces === void 0 || lock.packages === void 0) {
+    throw new LockfileError('unsupported bun.lock: "workspaces" and "packages" are required');
+  }
+  const packages = lock.packages;
+  const workspaces = lock.workspaces;
+  const workspaceKey = /* @__PURE__ */ new Map([["", ""]]);
+  for (const [key, entry] of Object.entries(packages)) {
+    const { version: version3 } = parseResolution(resolutionOf(entry));
+    if (version3.startsWith("workspace:"))
+      workspaceKey.set(version3.slice("workspace:".length), key);
+  }
+  const nodeId = (key) => {
+    const { version: version3 } = parseResolution(resolutionOf(packages[key]));
+    return version3.startsWith("workspace:") ? `workspace:${version3.slice(10)}` : key;
+  };
+  const resolveId = (scope, name) => {
+    const key = resolve2(packages, scope, name);
+    return key === void 0 ? void 0 : nodeId(key);
+  };
+  const nodes = /* @__PURE__ */ new Map();
+  const importers = /* @__PURE__ */ new Map();
+  for (const [key, entry] of Object.entries(packages)) {
+    const { name, version: version3 } = parseResolution(resolutionOf(entry));
+    if (version3.startsWith("workspace:"))
+      continue;
+    const info = entry.find((item, index) => index > 0 && typeof item === "object") ?? {};
+    const runtime = {
+      ...info.dependencies,
+      ...info.optionalDependencies,
+      ...info.peerDependencies
+    };
+    nodes.set(key, {
+      name,
+      version: version3,
+      deps: Object.keys(runtime).flatMap((dep) => resolveId(key, dep) ?? [])
+    });
+  }
+  for (const [path, workspace] of Object.entries(workspaces)) {
+    const scope = workspaceKey.get(path) ?? "";
+    const list = (record2) => Object.keys(record2 ?? {}).flatMap((dep) => {
+      const id = resolveId(scope, dep);
+      return id === void 0 ? [] : [{ name: dep, id }];
+    });
+    const prod = list({
+      ...workspace.dependencies,
+      ...workspace.optionalDependencies,
+      ...workspace.peerDependencies
+    });
+    const importerPath = path === "" ? "." : path;
+    nodes.set(`workspace:${path}`, {
+      name: workspace.name ?? importerPath,
+      version: workspace.version ?? "0.0.0",
+      workspace: importerPath,
+      deps: prod.map((d) => d.id)
+    });
+    importers.set(importerPath, { prod, dev: list(workspace.devDependencies) });
+  }
+  return { format: "bun", importers, nodes };
+}
+
 // ../measure/dist/lockfile/npm.js
 var MARKER = "node_modules/";
 function nameFromLocation(location) {
   const index = location.lastIndexOf(MARKER);
   return index === -1 ? location : location.slice(index + MARKER.length);
 }
-function resolve2(packages, from, name) {
+function resolve3(packages, from, name) {
   const segments = from === "" ? [] : from.split("/");
   for (let length = segments.length; length >= 0; length -= 1) {
     if (length > 0 && segments[length - 1] === "node_modules")
@@ -43437,7 +43566,7 @@ function parseNpmLock(text2) {
       ...entry.optionalDependencies,
       ...entry.peerDependencies
     };
-    const deps = Object.keys(runtime).map((name) => resolve2(packages, location, name)).filter((id) => id !== void 0).map(target);
+    const deps = Object.keys(runtime).map((name) => resolve3(packages, location, name)).filter((id) => id !== void 0).map(target);
     const isWorkspace = !location.includes(MARKER);
     const path = location === "" ? "." : location;
     nodes.set(location, {
@@ -43448,7 +43577,7 @@ function parseNpmLock(text2) {
     });
     if (isWorkspace) {
       const list = (record2) => Object.keys(record2 ?? {}).flatMap((name) => {
-        const id = resolve2(packages, location, name);
+        const id = resolve3(packages, location, name);
         return id === void 0 ? [] : [{ name, id: target(id) }];
       });
       importers.set(path, {
@@ -43641,11 +43770,13 @@ var LOCKFILES = [
   "pnpm-lock.yaml",
   "package-lock.json",
   "npm-shrinkwrap.json",
-  "yarn.lock"
+  "yarn.lock",
+  "bun.lock",
+  "bun.lockb"
 ];
 async function findLockfile(startDir, stopDir) {
-  let dir = resolve3(startDir);
-  const stop2 = stopDir === void 0 ? void 0 : resolve3(stopDir);
+  let dir = resolve4(startDir);
+  const stop2 = stopDir === void 0 ? void 0 : resolve4(stopDir);
   for (; ; ) {
     const names = new Set(await readdir2(dir).catch(() => []));
     const name = LOCKFILES.find((candidate) => names.has(candidate));
@@ -43689,7 +43820,7 @@ async function yarnWorkspaces(root) {
   return workspaces;
 }
 async function readLockGraph(location) {
-  const text2 = await readFile3(location.path, "utf8");
+  const text2 = location.name === "bun.lockb" ? "" : await readFile3(location.path, "utf8");
   switch (location.name) {
     case "pnpm-lock.yaml":
       return parsePnpmLock(text2);
@@ -43698,6 +43829,10 @@ async function readLockGraph(location) {
       return parseNpmLock(text2);
     case "yarn.lock":
       return parseYarnLock(text2, await yarnWorkspaces(dirname(location.path)));
+    case "bun.lock":
+      return parseBunLock(text2);
+    case "bun.lockb":
+      throw new LockfileError(`${location.path} is Bun's binary lockfile, which usertax cannot read: run \`bun install --save-text-lockfile\` to write bun.lock (the default since Bun 1.2)`);
   }
 }
 async function readAppDependencies(appDir, stopDir) {
@@ -43705,7 +43840,7 @@ async function readAppDependencies(appDir, stopDir) {
   if (lockfile === void 0)
     return void 0;
   const graph = await readLockGraph(lockfile);
-  const importer = relative(dirname(lockfile.path), resolve3(appDir)).split(sep).join("/") || ".";
+  const importer = relative(dirname(lockfile.path), resolve4(appDir)).split(sep).join("/") || ".";
   return { lockfile, format: graph.format, dependencies: dependenciesOf(graph, importer) };
 }
 
@@ -44346,7 +44481,7 @@ async function measureWebApp(options) {
 }
 
 // ../measure/dist/next.js
-var STATIC_PREFIX = "/_next/static/";
+var STATIC_SEGMENT = "/_next/static/";
 var SPECIAL = /* @__PURE__ */ new Set([
   "_not-found",
   "_global-error",
@@ -44403,8 +44538,10 @@ function htmlAssets(html) {
     if (!isScript && !isPreload && !isStylesheet)
       continue;
     const url2 = /\b(?:src|href)="([^"]+)"/i.exec(text2)?.[1];
-    if (url2?.startsWith(STATIC_PREFIX) === true)
-      files.push(decodeURI(url2.slice(STATIC_PREFIX.length).split("?")[0] ?? ""));
+    const index = url2?.indexOf(STATIC_SEGMENT) ?? -1;
+    if (url2 !== void 0 && index !== -1) {
+      files.push(decodeURI(url2.slice(index + STATIC_SEGMENT.length).split(/[?#]/)[0] ?? ""));
+    }
   }
   return [...new Set(files)];
 }
@@ -44655,11 +44792,11 @@ function serveStatic(root) {
       response.writeHead(400).end();
     });
   });
-  return new Promise((resolve9, reject) => {
+  return new Promise((resolve11, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
       const { port } = server.address();
-      resolve9({
+      resolve11({
         url: `http://127.0.0.1:${port}`,
         close: () => new Promise((done) => server.close(() => {
           done();
@@ -44673,18 +44810,18 @@ function serveStatic(root) {
 import { spawn } from "node:child_process";
 import { stat as stat5 } from "node:fs/promises";
 import { createServer as createServer2 } from "node:net";
-import { dirname as dirname2, join as join11, resolve as resolve4 } from "node:path";
+import { dirname as dirname2, join as join11, resolve as resolve5 } from "node:path";
 var ServerError = class extends Error {
   name = "ServerError";
 };
 function freePort() {
-  return new Promise((resolve9, reject) => {
+  return new Promise((resolve11, reject) => {
     const server = createServer2();
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
       const { port } = server.address();
       server.close(() => {
-        resolve9(port);
+        resolve11(port);
       });
     });
   });
@@ -44698,19 +44835,19 @@ async function waitForUrl(url2, timeoutMs, isAlive = () => true) {
       await fetch(url2, { signal: AbortSignal.timeout(2e3) });
       return;
     } catch {
-      await new Promise((resolve9) => setTimeout(resolve9, 250));
+      await new Promise((resolve11) => setTimeout(resolve11, 250));
     }
   }
   throw new ServerError(`${url2} did not answer within ${Math.round(timeoutMs / 1e3)} s`);
 }
 function stop(child) {
-  return new Promise((resolve9) => {
+  return new Promise((resolve11) => {
     if (child.exitCode !== null || child.pid === void 0) {
-      resolve9();
+      resolve11();
       return;
     }
     child.once("exit", () => {
-      resolve9();
+      resolve11();
     });
     try {
       process.kill(-child.pid, "SIGTERM");
@@ -44743,7 +44880,7 @@ function startCommand(command, cwd, url2, timeoutMs = 6e4) {
   return launch(command, [], { cwd, shell: true, url: url2, timeoutMs });
 }
 async function findNextBin(appDir) {
-  let dir = resolve4(appDir);
+  let dir = resolve5(appDir);
   for (; ; ) {
     const candidate = join11(dir, "node_modules", "next", "dist", "bin", "next");
     if ((await stat5(candidate).catch(() => void 0))?.isFile() === true)
@@ -44784,11 +44921,11 @@ function createReport(options) {
 }
 
 // ../cli/dist/index.js
-import { parseArgs as parseArgs3 } from "node:util";
+import { parseArgs as parseArgs4 } from "node:util";
 
 // ../cli/dist/commands/diff.js
 import { readFile as readFile7, writeFile } from "node:fs/promises";
-import { resolve as resolve5 } from "node:path";
+import { resolve as resolve6 } from "node:path";
 import { parseArgs } from "node:util";
 
 // ../cli/dist/io.js
@@ -44883,7 +45020,7 @@ async function diffCommand(argv, io) {
   const cwd = process.cwd();
   let config2;
   try {
-    config2 = (await loadConfig(await gitRoot(cwd) ?? cwd, values.config === void 0 ? void 0 : resolve5(cwd, values.config)))?.config;
+    config2 = (await loadConfig(await gitRoot(cwd) ?? cwd, values.config === void 0 ? void 0 : resolve6(cwd, values.config)))?.config;
   } catch (error62) {
     if (error62 instanceof ConfigError)
       throw new UsageError(error62.message);
@@ -44908,10 +45045,314 @@ async function diffCommand(argv, io) {
   return budgets?.status === "fail" ? EXIT.budgetFailed : EXIT.ok;
 }
 
-// ../cli/dist/commands/measure.js
-import { stat as stat6, writeFile as writeFile2 } from "node:fs/promises";
-import { basename as basename2, relative as relative5, resolve as resolve6, sep as sep6 } from "node:path";
+// ../cli/dist/commands/init.js
+import { mkdir, readFile as readFile8, readdir as readdir6, stat as stat6, writeFile as writeFile2 } from "node:fs/promises";
+import { dirname as dirname3, join as join12, resolve as resolve7 } from "node:path";
 import { parseArgs as parseArgs2 } from "node:util";
+var INIT_HELP = `Usage:
+  usertax init [options]
+
+Sets up usertax in the current repository: writes the GitHub Actions workflows (and, with
+--budget, a usertax.config.json), using the package manager and build script it detects.
+Existing files are left alone unless --force is given.
+
+Options:
+      --single     One workflow that measures and comments (for repositories that do not
+                   accept pull requests from forks). Default: the fork-safe pair of workflows.
+      --budget     Also write usertax.config.json with a starter budget
+      --force      Overwrite existing files
+      --dry-run    Print the files instead of writing them
+  -h, --help       Show this help
+`;
+var ACTIONS = {
+  checkout: "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1",
+  setupNode: "actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0",
+  pnpm: "pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0",
+  bun: "oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0",
+  upload: "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2",
+  download: "actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2",
+  usertax: "omerozkilic/usertax-action@v0"
+};
+async function detectPackageManager(root) {
+  const names = new Set(await readdir6(root).catch(() => []));
+  if (names.has("pnpm-lock.yaml"))
+    return "pnpm";
+  if (names.has("bun.lock") || names.has("bun.lockb"))
+    return "bun";
+  if (names.has("yarn.lock")) {
+    const lock = await readFile8(join12(root, "yarn.lock"), "utf8");
+    return lock.includes("__metadata:") ? "yarn" : "yarn-classic";
+  }
+  return "npm";
+}
+function setupSteps(pm, lockfile) {
+  const node2 = (cache) => [
+    `      - uses: ${ACTIONS.setupNode}`,
+    "        with:",
+    "          node-version: 24",
+    ...cache === void 0 ? [] : [`          cache: ${cache}`]
+  ];
+  switch (pm) {
+    case "pnpm":
+      return [
+        `      - uses: ${ACTIONS.pnpm}`,
+        ...node2("pnpm"),
+        "      - run: pnpm install --frozen-lockfile"
+      ];
+    case "yarn":
+      return [...node2(), "      - run: corepack enable && yarn install --immutable"];
+    case "yarn-classic":
+      return [...node2("yarn"), "      - run: yarn install --frozen-lockfile"];
+    case "bun":
+      return [
+        `      - uses: ${ACTIONS.bun}`,
+        ...node2(),
+        "      - run: bun install --frozen-lockfile"
+      ];
+    case "npm":
+      return lockfile ? [...node2("npm"), "      - run: npm ci"] : [...node2(), "      - run: npm install"];
+  }
+}
+function runScript(pm) {
+  return pm === "npm" ? "npm run build" : pm === "yarn-classic" ? "yarn build" : `${pm} run build`;
+}
+function buildStep(info) {
+  return info.hasBuildScript ? [
+    `      - run: ${runScript(info.packageManager)} # build with source maps (see the notes of usertax init)`
+  ] : [
+    "      # Replace with the command that builds your apps, with source maps:",
+    `      - run: ${runScript(info.packageManager)}`
+  ];
+}
+var HEADER = "# Generated by `usertax init`. Docs: https://github.com/omerozkilic/usertax";
+function measureWorkflow(info, single) {
+  const permissions = single ? [
+    "permissions:",
+    "  contents: read",
+    "  actions: read",
+    "  pull-requests: write",
+    "  statuses: write"
+  ] : ["permissions:", "  contents: read"];
+  return [
+    HEADER,
+    single ? "# Measures each pull request and comments on it in one job (no pull requests from forks)." : "# Step 1 of 2: builds and measures with a read-only token; usertax-comment.yml comments.",
+    "name: usertax",
+    "on:",
+    "  pull_request:",
+    "  push:",
+    `    branches: [${info.defaultBranch}] # stores the base report that pull requests are compared with`,
+    "  workflow_dispatch: # run on the default branch to recreate a missing base report",
+    ...permissions,
+    "jobs:",
+    "  usertax:",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    `      - uses: ${ACTIONS.checkout}`,
+    "        with:",
+    "          persist-credentials: false",
+    ...setupSteps(info.packageManager, info.lockfile),
+    ...buildStep(info),
+    "      - id: usertax",
+    `        uses: ${ACTIONS.usertax}`,
+    "        with:",
+    `          mode: ${single ? "all" : "measure"}`,
+    `      - uses: ${ACTIONS.upload}`,
+    "        if: always() && steps.usertax.outputs.report",
+    "        with:",
+    "          name: ${{ steps.usertax.outputs.artifact-name }}",
+    "          path: ${{ steps.usertax.outputs.report }}",
+    "          retention-days: 90",
+    ""
+  ].join("\n");
+}
+function commentWorkflow() {
+  return [
+    HEADER,
+    "# Step 2 of 2: posts the comment from the default branch and reads the report as data.",
+    "name: usertax comment",
+    "on:",
+    "  workflow_run:",
+    "    workflows: [usertax]",
+    "    types: [completed]",
+    "permissions:",
+    "  contents: read",
+    "  actions: read",
+    "  pull-requests: write",
+    "  statuses: write",
+    "jobs:",
+    "  comment:",
+    "    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'",
+    "    runs-on: ubuntu-latest",
+    "    steps:",
+    "      # The default branch, never the pull request: your trusted configuration.",
+    `      - uses: ${ACTIONS.checkout}`,
+    "        with:",
+    "          persist-credentials: false",
+    `      - uses: ${ACTIONS.download}`,
+    "        with:",
+    "          name: usertax-head",
+    "          run-id: ${{ github.event.workflow_run.id }}",
+    "          github-token: ${{ github.token }}",
+    "          path: .usertax-head",
+    `      - uses: ${ACTIONS.usertax}`,
+    "        with:",
+    "          mode: comment",
+    "          head-report: .usertax-head/usertax-report.json",
+    ""
+  ].join("\n");
+}
+var WEB = /* @__PURE__ */ new Set(["vite", "next", "webpack"]);
+var MOBILE = /* @__PURE__ */ new Set(["expo", "react-native"]);
+function starterConfig(apps) {
+  const budgets = [];
+  if (apps.length === 0 || apps.some((a) => WEB.has(a.framework))) {
+    budgets.push({ metric: "route[*].js.gzip", maxIncrease: "10 kB" });
+  }
+  if (apps.some((a) => MOBILE.has(a.framework))) {
+    budgets.push({ metric: "bundle[*].raw", maxIncreasePercent: 2, level: "warn" });
+  }
+  return `${JSON.stringify({
+    $schema: "https://raw.githubusercontent.com/omerozkilic/usertax/main/packages/core/schema/config.schema.json",
+    budgets
+  }, null, 2)}
+`;
+}
+async function appNotes(root, apps) {
+  const notes = [];
+  const config2 = async (dir, prefix) => {
+    const files = await readdir6(join12(root, dir)).catch(() => []);
+    const file2 = files.find((f) => f.startsWith(prefix) && /\.(?:[cm]?[jt]s)$/.test(f));
+    return file2 === void 0 ? void 0 : readFile8(join12(root, dir, file2), "utf8");
+  };
+  for (const app of apps) {
+    const where = app.path === "." ? "the root app" : app.path;
+    if (app.framework === "vite") {
+      const text2 = await config2(app.path, "vite.config.") ?? "";
+      if (!text2.includes("sourcemap") || !text2.includes("manifest")) {
+        notes.push(`${where} (Vite): set build.sourcemap to 'hidden' and build.manifest to true in vite.config, for packages and routes.`);
+      }
+    } else if (app.framework === "next") {
+      const text2 = await config2(app.path, "next.config.") ?? "";
+      if (!text2.includes("productionBrowserSourceMaps")) {
+        notes.push(`${where} (Next.js): set productionBrowserSourceMaps: true in next.config, for packages.`);
+      }
+    } else if (app.framework === "webpack") {
+      notes.push(`${where} (webpack): emit source maps (devtool: 'hidden-source-map').`);
+    } else if (app.framework === "expo") {
+      notes.push(`${where} (Expo): the build must run \`npx expo export --source-maps\`, one platform at a time for reproducible bundles (--platform android, then ios).`);
+    } else {
+      notes.push(`${where} (React Native): list its bundles (and optionally APK/AAB/IPA files) in usertax.config.json; see docs/configuration.md.`);
+    }
+  }
+  return notes;
+}
+async function exists2(path) {
+  return await stat6(path).catch(() => void 0) !== void 0;
+}
+async function defaultBranch(root) {
+  const remote = await readFile8(join12(root, ".git", "refs", "remotes", "origin", "HEAD"), "utf8").catch(() => "");
+  const fromRemote = /^ref: refs\/remotes\/origin\/(.+)$/m.exec(remote)?.[1]?.trim();
+  if (fromRemote !== void 0)
+    return fromRemote;
+  const head = await readFile8(join12(root, ".git", "HEAD"), "utf8").catch(() => "");
+  const current = /^ref: refs\/heads\/(.+)$/m.exec(head)?.[1]?.trim();
+  return current === "master" ? "master" : "main";
+}
+async function initCommand(argv, io, context) {
+  const { values, positionals } = parseArgs2({
+    args: [...argv],
+    allowPositionals: true,
+    strict: true,
+    options: {
+      single: { type: "boolean" },
+      budget: { type: "boolean" },
+      force: { type: "boolean" },
+      "dry-run": { type: "boolean" },
+      help: { type: "boolean", short: "h" }
+    }
+  });
+  if (values.help === true) {
+    io.stdout(INIT_HELP);
+    return EXIT.ok;
+  }
+  if (positionals.length > 0)
+    throw new UsageError(`unexpected argument ${positionals[0] ?? ""}`);
+  const root = await gitRoot(context.cwd) ?? resolve7(context.cwd);
+  const manifest = await readPackageJson(root);
+  if (manifest === void 0) {
+    throw new UsageError(`no package.json at the repository root ${root}`);
+  }
+  const names = new Set(await readdir6(root).catch(() => []));
+  const info = {
+    packageManager: await detectPackageManager(root),
+    lockfile: [
+      "pnpm-lock.yaml",
+      "package-lock.json",
+      "npm-shrinkwrap.json",
+      "yarn.lock",
+      "bun.lock",
+      "bun.lockb"
+    ].some((n) => names.has(n)),
+    hasBuildScript: typeof manifest.scripts?.["build"] === "string",
+    apps: await discoverApps(root),
+    defaultBranch: await defaultBranch(root)
+  };
+  const single = values.single === true;
+  const files = [
+    { path: ".github/workflows/usertax.yml", content: measureWorkflow(info, single) }
+  ];
+  if (!single) {
+    files.push({ path: ".github/workflows/usertax-comment.yml", content: commentWorkflow() });
+  }
+  if (values.budget === true) {
+    files.push({ path: "usertax.config.json", content: starterConfig(info.apps) });
+  }
+  const dryRun = values["dry-run"] === true;
+  const written = [];
+  const skipped = [];
+  for (const file2 of files) {
+    const target = join12(root, file2.path);
+    if (dryRun) {
+      io.stdout(`--- ${file2.path}
+${file2.content}
+`);
+      continue;
+    }
+    if (values.force !== true && await exists2(target)) {
+      skipped.push(file2.path);
+      continue;
+    }
+    await mkdir(dirname3(target), { recursive: true });
+    await writeFile2(target, file2.content);
+    written.push(file2.path);
+  }
+  const lines = [];
+  const apps = info.apps.length === 0 ? "no apps found yet (usertax looks for Vite, Next.js, webpack, Expo and React Native packages)" : info.apps.map((a) => `${a.path === "." ? "." : a.path} (${a.framework})`).join(", ");
+  lines.push(`Package manager: ${info.packageManager} \xB7 apps: ${apps}`);
+  if (!dryRun) {
+    for (const path of written)
+      lines.push(`created ${path}`);
+    for (const path of skipped)
+      lines.push(`skipped ${path} (exists; --force overwrites it)`);
+  }
+  const notes = await appNotes(root, info.apps);
+  if (!info.hasBuildScript) {
+    notes.unshift("No build script in package.json: edit the build step of usertax.yml.");
+  }
+  if (notes.length > 0)
+    lines.push("", "Before your first pull request:", ...notes.map((n) => `- ${n}`));
+  if (!dryRun) {
+    lines.push("", `Next: commit the files and push them to ${info.defaultBranch}, so that usertax stores the first`, "base report. Pull requests opened after that get a comparison.");
+  }
+  io.stdout(`${lines.join("\n")}
+`);
+  return EXIT.ok;
+}
+
+// ../cli/dist/commands/measure.js
+import { stat as stat7, writeFile as writeFile3 } from "node:fs/promises";
+import { basename as basename2, relative as relative5, resolve as resolve8, sep as sep6 } from "node:path";
+import { parseArgs as parseArgs3 } from "node:util";
 var MEASURE_HELP = `Usage:
   usertax measure [app-dir] [options]
 
@@ -44976,11 +45417,11 @@ function parseBundle(value, cwd) {
   if (match?.[1] === void 0 || match[2] === void 0 || !PLATFORMS.has(match[1])) {
     throw new UsageError(`--bundle expects <android|ios>=<file>, received "${value}"`);
   }
-  return { platform: match[1], file: resolve6(cwd, match[2]) };
+  return { platform: match[1], file: resolve8(cwd, match[2]) };
 }
 function parseArchive(value, cwd) {
   const match = /^([\w.-]+)=(.+)$/.exec(value);
-  return match?.[1] !== void 0 && match[2] !== void 0 && !/\.(apk|aab|ipa)$/i.test(match[1]) ? { key: match[1], file: resolve6(cwd, match[2]) } : { file: resolve6(cwd, value) };
+  return match?.[1] !== void 0 && match[2] !== void 0 && !/\.(apk|aab|ipa)$/i.test(match[1]) ? { key: match[1], file: resolve8(cwd, match[2]) } : { file: resolve8(cwd, value) };
 }
 function appIdFrom(name, dir) {
   const raw = name ?? basename2(dir);
@@ -44988,7 +45429,7 @@ function appIdFrom(name, dir) {
   return id === "" ? "app" : id;
 }
 function specFromConfig(entry, root) {
-  const dir = resolve6(root, entry.path);
+  const dir = resolve8(root, entry.path);
   return {
     dir,
     id: entry.id,
@@ -44997,11 +45438,11 @@ function specFromConfig(entry, root) {
     outDir: entry.outDir,
     bundles: (entry.bundles ?? []).map((b) => ({
       platform: b.platform,
-      file: resolve6(dir, b.file),
-      ...b.map === void 0 ? {} : { map: resolve6(dir, b.map) }
+      file: resolve8(dir, b.file),
+      ...b.map === void 0 ? {} : { map: resolve8(dir, b.map) }
     })),
     archives: (entry.archives ?? []).map((a) => ({
-      file: resolve6(dir, a.file),
+      file: resolve8(dir, a.file),
       ...a.key === void 0 ? {} : { key: a.key }
     })),
     ...entry.lighthouse === void 0 ? {} : {
@@ -45064,9 +45505,9 @@ async function measureApp(spec, repoRoot, io, prefix) {
   }
   if (mobile && spec.lighthouse !== void 0)
     throw new UsageError("--lighthouse is for web apps");
-  const outDir = resolve6(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? "dist");
+  const outDir = resolve8(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? "dist");
   const needsOutDir = !mobile || framework === "expo" && spec.bundles.length === 0;
-  const outStat = needsOutDir ? await stat6(outDir).catch(() => void 0) : void 0;
+  const outStat = needsOutDir ? await stat7(outDir).catch(() => void 0) : void 0;
   if (needsOutDir && !outStat?.isDirectory() && !(mobile && spec.archives.length > 0)) {
     throw new UsageError(mobile ? `${outDir} not found; run expo export --source-maps first, or pass --bundle / --archive` : `build output ${outDir} not found; build the app first or pass --out-dir`);
   }
@@ -45152,7 +45593,7 @@ var APP_FLAGS = [
   "start"
 ];
 async function measureCommand(argv, io, context) {
-  const { values, positionals } = parseArgs2({
+  const { values, positionals } = parseArgs3({
     args: [...argv],
     allowPositionals: true,
     strict: true,
@@ -45187,11 +45628,11 @@ async function measureCommand(argv, io, context) {
   }
   if (values.sha !== void 0 && !SHA.test(values.sha))
     throw new UsageError("--sha must be a full 40-character commit SHA");
-  const startDir = resolve6(context.cwd, positionals[0] ?? ".");
+  const startDir = resolve8(context.cwd, positionals[0] ?? ".");
   const repoRoot = await gitRoot(startDir) ?? (positionals[0] === void 0 ? startDir : context.cwd);
   let loaded;
   try {
-    loaded = await loadConfig(repoRoot, values.config === void 0 ? void 0 : resolve6(context.cwd, values.config));
+    loaded = await loadConfig(repoRoot, values.config === void 0 ? void 0 : resolve8(context.cwd, values.config));
   } catch (error62) {
     if (error62 instanceof ConfigError)
       throw new UsageError(error62.message);
@@ -45213,14 +45654,14 @@ async function measureCommand(argv, io, context) {
   };
   let specs;
   if (positionals[0] !== void 0) {
-    const entry = loaded?.config.apps?.find((app) => resolve6(repoRoot, app.path) === startDir);
+    const entry = loaded?.config.apps?.find((app) => resolve8(repoRoot, app.path) === startDir);
     specs = [flagSpec(startDir, entry === void 0 ? void 0 : specFromConfig(entry, repoRoot))];
   } else {
     const used = APP_FLAGS.filter((flag) => values[flag] !== void 0);
     const fromConfig = loaded?.config.apps?.map((entry) => specFromConfig(entry, repoRoot));
     const discovered = fromConfig === void 0 ? await discoverApps(repoRoot) : void 0;
     const candidates = fromConfig ?? (discovered ?? []).filter((app) => app.framework !== "react-native").map((app) => ({
-      dir: resolve6(repoRoot, app.path),
+      dir: resolve8(repoRoot, app.path),
       framework: app.framework,
       bundles: [],
       archives: []
@@ -45262,14 +45703,14 @@ async function measureCommand(argv, io, context) {
   if (values.output === void 0)
     io.stdout(json2);
   else
-    await writeFile2(values.output, json2);
+    await writeFile3(values.output, json2);
   return EXIT.ok;
 }
 
 // ../cli/dist/mcp.js
-import { mkdtemp, writeFile as writeFile3 } from "node:fs/promises";
+import { mkdtemp, writeFile as writeFile4 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join as join12, resolve as resolve7 } from "node:path";
+import { join as join13, resolve as resolve9 } from "node:path";
 
 // ../../node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/util.js
 var util;
@@ -52776,7 +53217,7 @@ var Protocol = class {
           return;
         }
         const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
-        await new Promise((resolve9) => setTimeout(resolve9, pollInterval));
+        await new Promise((resolve11) => setTimeout(resolve11, pollInterval));
         options?.signal?.throwIfAborted();
       }
     } catch (error62) {
@@ -52793,7 +53234,7 @@ var Protocol = class {
    */
   request(request, resultSchema, options) {
     const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
-    return new Promise((resolve9, reject) => {
+    return new Promise((resolve11, reject) => {
       const earlyReject = (error62) => {
         reject(error62);
       };
@@ -52871,7 +53312,7 @@ var Protocol = class {
           if (!parseResult.success) {
             reject(parseResult.error);
           } else {
-            resolve9(parseResult.data);
+            resolve11(parseResult.data);
           }
         } catch (error62) {
           reject(error62);
@@ -53133,12 +53574,12 @@ var Protocol = class {
       }
     } catch {
     }
-    return new Promise((resolve9, reject) => {
+    return new Promise((resolve11, reject) => {
       if (signal.aborted) {
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
         return;
       }
-      const timeoutId = setTimeout(resolve9, interval);
+      const timeoutId = setTimeout(resolve11, interval);
       signal.addEventListener("abort", () => {
         clearTimeout(timeoutId);
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
@@ -54278,7 +54719,7 @@ var McpServer = class {
     let task = createTaskResult.task;
     const pollInterval = task.pollInterval ?? 5e3;
     while (task.status !== "completed" && task.status !== "failed" && task.status !== "cancelled") {
-      await new Promise((resolve9) => setTimeout(resolve9, pollInterval));
+      await new Promise((resolve11) => setTimeout(resolve11, pollInterval));
       const updatedTask = await extra.taskStore.getTask(taskId);
       if (!updatedTask) {
         throw new McpError(ErrorCode.InternalError, `Task ${taskId} not found during polling`);
@@ -54942,12 +55383,12 @@ var StdioServerTransport = class {
     this.onclose?.();
   }
   send(message2) {
-    return new Promise((resolve9) => {
+    return new Promise((resolve11) => {
       const json2 = serializeMessage(message2);
       if (this._stdout.write(json2)) {
-        resolve9();
+        resolve11();
       } else {
-        this._stdout.once("drain", resolve9);
+        this._stdout.once("drain", resolve11);
       }
     });
   }
@@ -54995,7 +55436,7 @@ function createMcpServer(options) {
   const server = new McpServer({ name: "usertax", version: options.version }, {
     instructions: "usertax measures what a change costs users: JavaScript per route, React Native bundles, APK/AAB/IPA size, and which npm packages cause it. Build the app first, call measure for the base and for the head, then compare. Numbers come from build output and source maps; do not estimate them."
   });
-  const path = (p) => resolve7(options.cwd, p);
+  const path = (p) => resolve9(options.cwd, p);
   server.registerTool("measure", {
     title: "Measure built apps",
     description: "Measures an already built app or repository (Vite, Next.js, webpack, static, Expo, React Native) and saves a usertax report. Returns the head values and the report path. Does not build anything and does not run Lighthouse.",
@@ -55030,8 +55471,8 @@ function createMcpServer(options) {
     if (code !== EXIT.ok)
       return text(io.err() || `measure failed (exit ${String(code)})`, true);
     const report = parseReport(JSON.parse(io.out()));
-    const output2 = input2.output === void 0 ? join12(await mkdtemp(join12(tmpdir(), "usertax-mcp-")), "report.json") : path(input2.output);
-    await writeFile3(output2, io.out());
+    const output2 = input2.output === void 0 ? join13(await mkdtemp(join13(tmpdir(), "usertax-mcp-")), "report.json") : path(input2.output);
+    await writeFile4(output2, io.out());
     const warnings = io.err().trim();
     return text([
       `Report saved to ${output2}`,
@@ -55142,7 +55583,7 @@ async function mcpCommand(argv, io, options, transport) {
 }
 
 // ../cli/dist/version.js
-var VERSION = true ? "0.1.4" : createRequire(import.meta.url)("../package.json").version;
+var VERSION = true ? "0.2.0" : createRequire(import.meta.url)("../package.json").version;
 
 // ../cli/dist/index.js
 var version2 = VERSION;
@@ -55155,6 +55596,7 @@ Usage:
 Commands:
   measure   Measure built apps (web, React Native, Expo) and write a report
   diff      Compare a head report with a base report, with budgets (Markdown or JSON)
+  init      Set up usertax in this repository (GitHub Actions workflows, configuration)
   mcp       Start the MCP server for AI assistants (standard input and output)
 
 Options:
@@ -55165,6 +55607,7 @@ Exit codes: 0 success \xB7 1 a budget failed \xB7 2 invalid usage or input \xB7 
 `;
 var COMMANDS = /* @__PURE__ */ new Map([
   ["diff", diffCommand],
+  ["init", (argv, io) => initCommand(argv, io, { cwd: process.cwd() })],
   [
     "measure",
     (argv, io) => measureCommand(argv, io, { version: version2, env: process.env, cwd: process.cwd() })
@@ -55200,7 +55643,7 @@ Run "usertax ${first ?? ""} --help" for usage.
   }
 }
 function global(argv, io) {
-  const parsed = parseArgs3({
+  const parsed = parseArgs4({
     args: [...argv],
     allowPositionals: true,
     strict: true,
@@ -55222,9 +55665,9 @@ function global(argv, io) {
 }
 
 // src/base.ts
-import { mkdtemp as mkdtemp2, rm, writeFile as writeFile4 } from "node:fs/promises";
+import { mkdtemp as mkdtemp2, rm, writeFile as writeFile5 } from "node:fs/promises";
 import { tmpdir as tmpdir2 } from "node:os";
-import { join as join13 } from "node:path";
+import { join as join14 } from "node:path";
 var BASE_ARTIFACT_PREFIX = "usertax-base-";
 var REPORT_FILE = "usertax-report.json";
 async function mergeBase(gh, baseRef, headSha) {
@@ -55249,10 +55692,10 @@ async function findBaseReport(gh, sha, maxAncestors = 20) {
       (a) => !a.expired && a.name === `${BASE_ARTIFACT_PREFIX}${candidate}`
     );
     if (artifact === void 0) continue;
-    const dir = await mkdtemp2(join13(tmpdir2(), "usertax-base-"));
+    const dir = await mkdtemp2(join14(tmpdir2(), "usertax-base-"));
     try {
-      const zip = join13(dir, "artifact.zip");
-      await writeFile4(zip, await gh.downloadArtifact(artifact.id));
+      const zip = join14(dir, "artifact.zip");
+      await writeFile5(zip, await gh.downloadArtifact(artifact.id));
       const report = parseReport(
         JSON.parse((await readZipFile(zip, REPORT_FILE)).toString("utf8"))
       );
@@ -55476,17 +55919,17 @@ var BASE_EVENTS = /* @__PURE__ */ new Set(["push", "workflow_dispatch", "schedul
 async function readEvent(env) {
   const path = env["GITHUB_EVENT_PATH"];
   if (path === void 0 || path === "") return {};
-  return JSON.parse(await readFile8(path, "utf8"));
+  return JSON.parse(await readFile9(path, "utf8"));
 }
 function short(sha) {
   return sha.slice(0, 7);
 }
 async function measure(ctx) {
   const { env } = ctx.rt;
-  const output2 = resolve8(ctx.workdir, getInput(env, "report") ?? REPORT_FILE);
+  const output2 = resolve10(ctx.workdir, getInput(env, "report") ?? REPORT_FILE);
   const args = ["measure", "--output", output2];
   const config2 = getInput(env, "config");
-  if (config2 !== void 0) args.push("--config", resolve8(ctx.workdir, config2));
+  if (config2 !== void 0) args.push("--config", resolve10(ctx.workdir, config2));
   const pr = ctx.event["pull_request"];
   if (pr?.head?.sha !== void 0) {
     args.push("--sha", pr.head.sha, "--ref", `refs/pull/${String(pr.number)}/head`);
@@ -55515,19 +55958,19 @@ async function measure(ctx) {
   return output2;
 }
 async function readHeadReport(path) {
-  const info = await stat7(path).catch(() => void 0);
+  const info = await stat8(path).catch(() => void 0);
   if (info === void 0)
     throw new InputError(
       `head report ${path} not found; download the measure workflow's artifact first`
     );
   if (info.size > MAX_REPORT_BYTES)
     throw new InputError(`head report ${path} is larger than ${MAX_REPORT_BYTES} bytes`);
-  return parseReport(JSON.parse(await readFile8(path, "utf8")));
+  return parseReport(JSON.parse(await readFile9(path, "utf8")));
 }
 async function loadTrustedConfig(ctx) {
   try {
     const file2 = getInput(ctx.rt.env, "config");
-    return (await loadConfig(ctx.workdir, file2 === void 0 ? void 0 : resolve8(ctx.workdir, file2)))?.config;
+    return (await loadConfig(ctx.workdir, file2 === void 0 ? void 0 : resolve10(ctx.workdir, file2)))?.config;
   } catch (error62) {
     if (error62 instanceof ConfigError) throw new InputError(error62.message);
     throw error62;
@@ -55609,7 +56052,7 @@ async function run2(rt) {
     const mode = getInput(rt.env, "mode") ?? "measure";
     const ctx = {
       rt,
-      workdir: resolve8(
+      workdir: resolve10(
         rt.env["GITHUB_WORKSPACE"] ?? process.cwd(),
         getInput(rt.env, "working-directory") ?? "."
       ),
@@ -55621,7 +56064,7 @@ async function run2(rt) {
         await measure(ctx);
         return 0;
       case "comment":
-        return await comment(ctx, resolve8(ctx.workdir, requireInput(rt.env, "head-report")));
+        return await comment(ctx, resolve10(ctx.workdir, requireInput(rt.env, "head-report")));
       case "all":
         return await comment(ctx, await measure(ctx));
       default:

@@ -4002,10 +4002,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep7, value } = collItem;
+        const { start, key, sep: sep8, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep7?.[0],
+          next: key ?? sep8?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4019,7 +4019,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep7) {
+          if (!keyProps.anchor && !keyProps.tag && !sep8) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map2.comment)
@@ -4043,7 +4043,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map2.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep7 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep8 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4059,7 +4059,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep7, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep8, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4150,7 +4150,7 @@ var require_resolve_end = __commonJS({
       let comment2 = "";
       if (end) {
         let hasSpace = false;
-        let sep7 = "";
+        let sep8 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4164,13 +4164,13 @@ var require_resolve_end = __commonJS({
               if (!comment2)
                 comment2 = cb;
               else
-                comment2 += sep7 + cb;
-              sep7 = "";
+                comment2 += sep8 + cb;
+              sep8 = "";
               break;
             }
             case "newline":
               if (comment2)
-                sep7 += source;
+                sep8 += source;
               hasSpace = true;
               break;
             default:
@@ -4213,18 +4213,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep7, value } = collItem;
+        const { start, key, sep: sep8, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep7?.[0],
+          next: key ?? sep8?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep7 && !value) {
+          if (!props.anchor && !props.tag && !sep8 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4278,8 +4278,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep7 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep7, null, props, onError);
+        if (!isMap && !sep8 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep8, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4291,7 +4291,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep7 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep8 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4302,8 +4302,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep7)
-                for (const st of sep7) {
+              if (sep8)
+                for (const st of sep8) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4320,7 +4320,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep7, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep8, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4500,7 +4500,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep7 = "";
+      let sep8 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4517,24 +4517,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep7 + indent.slice(trimIndent) + content;
-          sep7 = "\n";
+          value += sep8 + indent.slice(trimIndent) + content;
+          sep8 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep7 === " ")
-            sep7 = "\n";
-          else if (!prevMoreIndented && sep7 === "\n")
-            sep7 = "\n\n";
-          value += sep7 + indent.slice(trimIndent) + content;
-          sep7 = "\n";
+          if (sep8 === " ")
+            sep8 = "\n";
+          else if (!prevMoreIndented && sep8 === "\n")
+            sep8 = "\n\n";
+          value += sep8 + indent.slice(trimIndent) + content;
+          sep8 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep7 === "\n")
+          if (sep8 === "\n")
             value += "\n";
           else
-            sep7 = "\n";
+            sep8 = "\n";
         } else {
-          value += sep7 + content;
-          sep7 = " ";
+          value += sep8 + content;
+          sep8 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4717,25 +4717,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep7 = " ";
+      let sep8 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep7 === "\n")
-            res += sep7;
+          if (sep8 === "\n")
+            res += sep8;
           else
-            sep7 = "\n";
+            sep8 = "\n";
         } else {
-          res += sep7 + lm;
-          sep7 = " ";
+          res += sep8 + lm;
+          sep8 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep7 + (match?.[1] ?? "");
+      return res + sep8 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5545,14 +5545,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep7, value }) {
+    function stringifyItem({ start, key, sep: sep8, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep7)
-        for (const st of sep7)
+      if (sep8)
+        for (const st of sep8)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6719,18 +6719,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep7;
+          let sep8;
           if (scalar.end) {
-            sep7 = scalar.end;
-            sep7.push(this.sourceToken);
+            sep8 = scalar.end;
+            sep8.push(this.sourceToken);
             delete scalar.end;
           } else
-            sep7 = [this.sourceToken];
+            sep8 = [this.sourceToken];
           const map2 = {
             type: "block-map",
             offset: scalar.offset,
             indent: scalar.indent,
-            items: [{ start, key: scalar, sep: sep7 }]
+            items: [{ start, key: scalar, sep: sep8 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map2;
@@ -6883,15 +6883,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep7 = it.sep;
-                  sep7.push(this.sourceToken);
+                  const sep8 = it.sep;
+                  sep8.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep7 }]
+                    items: [{ start: start2, key, sep: sep8 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7085,13 +7085,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep7 = fc.end.splice(1, fc.end.length);
-            sep7.push(this.sourceToken);
+            const sep8 = fc.end.splice(1, fc.end.length);
+            sep8.push(this.sourceToken);
             const map2 = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep7 }]
+              items: [{ start, key: fc, sep: sep8 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map2;
@@ -9588,11 +9588,11 @@ var require_resolve = __commonJS({
       return id ? id.replace(TRAILING_SLASH_HASH, "") : "";
     }
     exports.normalizeId = normalizeId;
-    function resolveUrl(resolver, baseId, id) {
+    function resolveUrl2(resolver, baseId, id) {
       id = normalizeId(id);
       return resolver.resolve(baseId, id);
     }
-    exports.resolveUrl = resolveUrl;
+    exports.resolveUrl = resolveUrl2;
     var ANCHOR = /^[a-z_][-a-z0-9._]*$/i;
     function getSchemaRefs(schema, baseId) {
       if (typeof schema == "boolean")
@@ -10320,7 +10320,7 @@ var require_compile = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve11.call(this, root, ref);
+      let _sch = resolve12.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
         const { schemaId } = this.opts;
@@ -10347,7 +10347,7 @@ var require_compile = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve11(root, ref) {
+    function resolve12(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -11211,7 +11211,7 @@ var require_fast_uri = __commonJS({
       }
       return uri;
     }
-    function resolve11(baseURI, relativeURI, options) {
+    function resolve12(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -11247,50 +11247,50 @@ var require_fast_uri = __commonJS({
       schemelessOptions.skipEscape = true;
       return serialize(resolved, schemelessOptions);
     }
-    function resolveComponent(base, relative6, options, skipNormalization) {
+    function resolveComponent(base, relative7, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
         base = parse7(serialize(base, options), options);
-        relative6 = parse7(serialize(relative6, options), options);
+        relative7 = parse7(serialize(relative7, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative6.scheme) {
-        target.scheme = relative6.scheme;
-        target.userinfo = relative6.userinfo;
-        target.host = relative6.host;
-        target.port = relative6.port;
-        target.path = removeDotSegments(relative6.path || "");
-        target.query = relative6.query;
+      if (!options.tolerant && relative7.scheme) {
+        target.scheme = relative7.scheme;
+        target.userinfo = relative7.userinfo;
+        target.host = relative7.host;
+        target.port = relative7.port;
+        target.path = removeDotSegments(relative7.path || "");
+        target.query = relative7.query;
       } else {
-        if (relative6.userinfo !== void 0 || relative6.host !== void 0 || relative6.port !== void 0) {
-          target.userinfo = relative6.userinfo;
-          target.host = relative6.host;
-          target.port = relative6.port;
-          target.path = removeDotSegments(relative6.path || "");
-          target.query = relative6.query;
+        if (relative7.userinfo !== void 0 || relative7.host !== void 0 || relative7.port !== void 0) {
+          target.userinfo = relative7.userinfo;
+          target.host = relative7.host;
+          target.port = relative7.port;
+          target.path = removeDotSegments(relative7.path || "");
+          target.query = relative7.query;
         } else {
-          if (!relative6.path) {
+          if (!relative7.path) {
             target.path = base.path;
-            if (relative6.query !== void 0) {
-              target.query = relative6.query;
+            if (relative7.query !== void 0) {
+              target.query = relative7.query;
             } else {
               target.query = base.query;
             }
           } else {
-            if (relative6.path[0] === "/") {
-              target.path = removeDotSegments(relative6.path);
+            if (relative7.path[0] === "/") {
+              target.path = removeDotSegments(relative7.path);
             } else {
               const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
               if (baseHasAuthority && !base.path) {
-                target.path = "/" + relative6.path;
+                target.path = "/" + relative7.path;
               } else if (!base.path) {
-                target.path = relative6.path;
+                target.path = relative7.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative6.path;
+                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative7.path;
               }
               target.path = base.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
             }
-            target.query = relative6.query;
+            target.query = relative7.query;
           }
           target.userinfo = base.userinfo;
           target.host = base.host;
@@ -11298,7 +11298,7 @@ var require_fast_uri = __commonJS({
         }
         target.scheme = base.scheme;
       }
-      target.fragment = relative6.fragment;
+      target.fragment = relative7.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
@@ -11602,7 +11602,7 @@ var require_fast_uri = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize: normalize2,
-      resolve: resolve11,
+      resolve: resolve12,
       resolveComponent,
       equal,
       serialize,
@@ -14592,8 +14592,8 @@ var require_dist2 = __commonJS({
 });
 
 // src/run.ts
-import { readFile as readFile9, stat as stat8 } from "node:fs/promises";
-import { resolve as resolve10 } from "node:path";
+import { readFile as readFile13, stat as stat8 } from "node:fs/promises";
+import { resolve as resolve11 } from "node:path";
 
 // ../core/dist/data/alternatives.json
 var alternatives_default = {
@@ -26717,7 +26717,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve11) {
+function isRecursive(inst, stack, resolve12) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -26727,7 +26727,7 @@ function isRecursive(inst, stack, resolve11) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve11);
+      const answer = isRecursive(child, stack, resolve12);
       if (answer > result)
         result = answer;
     }
@@ -26738,7 +26738,7 @@ function isRecursive(inst, stack, resolve11) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve11) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve12) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -26802,7 +26802,7 @@ function isRecursive(inst, stack, resolve11) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve11 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve12 ? inst._zod.innerType : void 0);
       merge2(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -41486,6 +41486,12 @@ function checksFor(budget, metric) {
   changeCheck("maxDecrease", budget.maxDecrease, false, -1);
   changeCheck("maxIncreasePercent", budget.maxIncreasePercent, true, 1);
   changeCheck("maxDecreasePercent", budget.maxDecreasePercent, true, -1);
+  if (metric.contamination !== void 0) {
+    return checks.map((check2) => ({
+      ...check2,
+      skipReason: "Lighthouse ran with browser extensions active"
+    }));
+  }
   return checks.map((check2) => {
     const isChangeCheck = check2.limit !== "max" && check2.limit !== "min";
     if (!isChangeCheck || check2.skipReason !== void 0)
@@ -41557,7 +41563,12 @@ var packageContributionSchema = external_exports.object({
   /** npm package name. Bytes without a package (first-party code) are reported separately. */
   name: external_exports.string().min(1).max(214),
   /** Minified bytes attributed to the package by the source map. */
-  bytes
+  bytes,
+  /**
+   * Bytes per installed version, only when this file contains more than one version of the
+   * package (a duplicate). Copies whose version could not be read are left out.
+   */
+  versions: external_exports.array(external_exports.object({ version: external_exports.string().min(1).max(256), bytes })).min(2).max(50).optional()
 });
 var moduleContributionSchema = external_exports.object({
   /** Original source path from the source map, normalised to `/` separators. */
@@ -41597,7 +41608,10 @@ var assetSchema = external_exports.object({
 });
 var routeSchema = external_exports.object({
   route: external_exports.string().min(1).max(512),
-  /** Keys of the assets loaded for this route. */
+  /**
+   * Keys of the assets of this route: the JavaScript and CSS it loads initially, and the images
+   * and fonts its HTML and stylesheets reference.
+   */
   assets: external_exports.array(external_exports.string().min(1).max(512)).max(1e3)
 });
 var platformSchema = external_exports.enum(["ios", "android"]);
@@ -41644,6 +41658,15 @@ var archiveSchema = external_exports.object({
   /** Entries left out of `entries` by the collector, aggregated. */
   omittedEntries: external_exports.object({ count: external_exports.number().int().nonnegative(), compressed: bytes, uncompressed: bytes }).optional()
 });
+var lighthouseContaminationSchema = external_exports.object({
+  /**
+   * Origins of browser extensions whose requests or scripts appeared in the run, such as
+   * `chrome-extension://<id>`. Their code is attributed to the page, so the run is not comparable.
+   */
+  origins: external_exports.array(external_exports.string().min(1).max(200)).min(1).max(20),
+  /** Distinct extension URLs seen in the run (requests and scripts). */
+  requestCount: external_exports.number().int().nonnegative()
+});
 var lighthouseRunSchema = external_exports.object({
   /** Performance score, 0–100. */
   performance: external_exports.number().min(0).max(100),
@@ -41652,7 +41675,9 @@ var lighthouseRunSchema = external_exports.object({
   /** Total Blocking Time in milliseconds. */
   tbt: external_exports.number().nonnegative(),
   /** Cumulative Layout Shift (unitless). */
-  cls: external_exports.number().nonnegative()
+  cls: external_exports.number().nonnegative(),
+  /** Present when browser extensions were active in the run; see {@link lighthouseContaminationSchema}. */
+  contamination: lighthouseContaminationSchema.optional()
 });
 var lighthouseSchema = external_exports.object({
   /** Page identity, usually a path such as `/` or `/pricing`. */
@@ -41669,13 +41694,25 @@ var dependencySchema = external_exports.object({
   /** Only reachable through dev dependencies. */
   dev: external_exports.boolean().optional(),
   /** For transitive dependencies: up to three direct dependencies that pull it in. */
-  via: external_exports.array(external_exports.string().min(1).max(214)).max(3).optional()
+  via: external_exports.array(external_exports.string().min(1).max(214)).max(3).optional(),
+  /**
+   * For a transitive dependency more than one step from the app: the shortest chain of packages
+   * from a direct dependency down to the one that depends on this package. Absent when `via`
+   * already says it all.
+   */
+  chain: external_exports.array(external_exports.string().min(1).max(214)).min(2).max(10).optional()
 });
 var appKindSchema = external_exports.enum(["web", "react-native"]);
 var frameworkSchema = external_exports.enum([
   "vite",
   "next",
+  "react-router",
+  "nuxt",
+  "astro",
+  "sveltekit",
   "webpack",
+  "rsbuild",
+  "rspack",
   "expo",
   "react-native",
   "static",
@@ -41874,6 +41911,9 @@ function diffDependencies(base, head) {
     }
     const entries2 = after.get(name) ?? before.get(name) ?? [];
     const via = [...new Set(entries2.flatMap((d) => d.via ?? []))].sort().slice(0, 3);
+    const steps = (d) => d.direct ? 0 : d.chain?.length ?? (d.via === void 0 ? Infinity : 1);
+    const nearest = [...entries2].sort((a, b2) => steps(a) - steps(b2))[0];
+    const chain = nearest?.direct === true ? void 0 : nearest?.chain;
     changes.push({
       name,
       kind,
@@ -41881,7 +41921,8 @@ function diffDependencies(base, head) {
       head: h,
       direct: entries2.some((d) => d.direct),
       dev: entries2.every((d) => d.dev === true),
-      ...via.length > 0 ? { via } : {}
+      ...via.length > 0 ? { via } : {},
+      ...chain === void 0 ? {} : { chain }
     });
   }
   return changes;
@@ -41966,6 +42007,47 @@ function sizeMetrics(idPrefix, label, group2, totals) {
   return metrics;
 }
 var PLATFORM_LABEL = { ios: "iOS", android: "Android" };
+function attributedFiles(app) {
+  return [
+    ...(app?.assets ?? []).filter((a) => a.type === "js").map((a) => ({ scope: "web", item: a })),
+    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b }))
+  ];
+}
+function packageTotals(app) {
+  const totals = /* @__PURE__ */ new Map();
+  const add = (scope, name, bytes2) => {
+    const byName = totals.get(scope) ?? /* @__PURE__ */ new Map();
+    totals.set(scope, byName);
+    byName.set(name, (byName.get(name) ?? 0) + bytes2);
+  };
+  for (const { scope, item } of attributedFiles(app)) {
+    for (const pkg of item.packages ?? [])
+      add(scope, pkg.name, pkg.bytes);
+    if (item.firstPartyBytes !== void 0)
+      add(scope, null, item.firstPartyBytes);
+  }
+  return totals;
+}
+function packageMetrics(app) {
+  const metrics = [];
+  for (const [scope, byName] of packageTotals(app)) {
+    for (const [name, bytes2] of byName) {
+      if (name === null)
+        continue;
+      const web = scope === "web";
+      metrics.push({
+        id: web ? `package[${name}].bytes` : `package[${name}][${scope}].bytes`,
+        group: "package",
+        label: web ? `Package ${name} (minified)` : `Package ${name} (${PLATFORM_LABEL[scope]}, minified)`,
+        unit: "bytes",
+        direction: "lower-is-better",
+        value: bytes2,
+        packageScope: scope
+      });
+    }
+  }
+  return metrics;
+}
 function assetMetrics(assets) {
   const js = assets.filter((asset) => asset.type === "js");
   const css = assets.filter((asset) => asset.type === "css");
@@ -41974,11 +42056,33 @@ function assetMetrics(assets) {
     ...css.length > 0 ? sizeMetrics("css.total", "CSS total", "web", sumSizes(css)) : []
   ];
 }
+function mediaMetric(route, name, label, loaded, type) {
+  const files = loaded.filter((asset) => asset.type === type);
+  if (files.length === 0)
+    return [];
+  return [
+    {
+      id: `route[${route}].${name}.bytes`,
+      group: "route",
+      label: `${label} for ${route}`,
+      unit: "bytes",
+      direction: "lower-is-better",
+      value: files.reduce((sum, asset) => sum + asset.raw, 0)
+    }
+  ];
+}
 function routeMetrics(app) {
   const byKey = new Map((app.assets ?? []).map((asset) => [asset.key, asset]));
   return (app.routes ?? []).flatMap((route) => {
-    const js = [...new Set(route.assets)].map((key) => byKey.get(key)).filter((asset) => asset?.type === "js");
-    return sizeMetrics(`route[${route.route}].js`, `JS for ${route.route}`, "route", sumSizes(js));
+    const loaded = [...new Set(route.assets)].map((key) => byKey.get(key)).filter((asset) => asset !== void 0);
+    const js = loaded.filter((asset) => asset.type === "js");
+    const css = loaded.filter((asset) => asset.type === "css");
+    return [
+      ...sizeMetrics(`route[${route.route}].js`, `JS for ${route.route}`, "route", sumSizes(js)),
+      ...css.length > 0 ? sizeMetrics(`route[${route.route}].css`, `CSS for ${route.route}`, "route", sumSizes(css)) : [],
+      ...mediaMetric(route.route, "images", "Images", loaded, "image"),
+      ...mediaMetric(route.route, "fonts", "Fonts", loaded, "font")
+    ];
   });
 }
 function bundleMetrics(bundles) {
@@ -42013,6 +42117,9 @@ var LIGHTHOUSE_METRICS = [
 function lighthouseMetrics(entries2) {
   return entries2.flatMap((entry) => LIGHTHOUSE_METRICS.map((metric) => {
     const samples = entry.runs.map((run3) => run3[metric.name]);
+    const origins = [
+      ...new Set(entry.runs.flatMap((run3) => run3.contamination?.origins ?? []))
+    ].sort();
     return {
       id: `lighthouse[${entry.url}][${entry.formFactor}].${metric.name}`,
       group: "lighthouse",
@@ -42021,7 +42128,8 @@ function lighthouseMetrics(entries2) {
       direction: metric.direction,
       value: summarize(samples).median,
       samples,
-      noiseKey: metric.name
+      noiseKey: metric.name,
+      ...origins.length > 0 ? { contamination: origins } : {}
     };
   }));
 }
@@ -42031,7 +42139,8 @@ function extractMetrics(app) {
     ...routeMetrics(app),
     ...bundleMetrics(app.bundles ?? []),
     ...archiveMetrics(app),
-    ...lighthouseMetrics(app.lighthouse ?? [])
+    ...lighthouseMetrics(app.lighthouse ?? []),
+    ...packageMetrics(app)
   ];
 }
 
@@ -42063,7 +42172,7 @@ function changeOf(base, head) {
   return "unchanged";
 }
 function verdictOf(change, significance, direction) {
-  if (significance === "not-comparable")
+  if (significance === "not-comparable" || significance === "unreliable")
     return "unknown";
   if (change === "unchanged" || significance === "within-noise")
     return "neutral";
@@ -42090,10 +42199,16 @@ function diffMetric(base, head, noise) {
     ...head?.samples === void 0 ? {} : { head: summarize(head.samples) }
   };
   const withSpread2 = Object.keys(spread).length > 0 ? { spread } : {};
+  const contamination = {
+    ...base?.contamination === void 0 ? {} : { base: base.contamination },
+    ...head?.contamination === void 0 ? {} : { head: head.contamination }
+  };
+  const withContamination = Object.keys(contamination).length > 0 ? { contamination } : {};
   if (base === void 0 || head === void 0) {
     return {
       ...common,
       ...withSpread2,
+      ...withContamination,
       change,
       significance: "not-comparable",
       verdict: "unknown"
@@ -42103,7 +42218,9 @@ function diffMetric(base, head, noise) {
   const percent = base.value === 0 ? void 0 : delta / Math.abs(base.value) * 100;
   let significance = "exact";
   let threshold;
-  if (spread.base !== void 0 && spread.head !== void 0) {
+  if (Object.keys(contamination).length > 0) {
+    significance = "unreliable";
+  } else if (spread.base !== void 0 && spread.head !== void 0) {
     const parameters = metric.noiseKey === void 0 ? void 0 : noise[metric.noiseKey] ?? void 0;
     if (parameters === void 0) {
       significance = "unassessed";
@@ -42116,6 +42233,7 @@ function diffMetric(base, head, noise) {
   return {
     ...common,
     ...withSpread2,
+    ...withContamination,
     delta,
     ...percent === void 0 ? {} : { percent },
     change,
@@ -42124,14 +42242,21 @@ function diffMetric(base, head, noise) {
     ...threshold === void 0 ? {} : { threshold }
   };
 }
+function absentAsZero(metric, other) {
+  if (metric.packageScope === void 0 || other === void 0)
+    return void 0;
+  if (!packageTotals(other).has(metric.packageScope))
+    return void 0;
+  return { ...metric, value: 0 };
+}
 function diffMetrics(base, head, noise) {
   const baseMetrics = new Map((base ? extractMetrics(base) : []).map((m) => [m.id, m]));
   const headMetrics = head ? extractMetrics(head) : [];
-  const result = headMetrics.map((metric) => diffMetric(baseMetrics.get(metric.id), metric, noise));
+  const result = headMetrics.map((metric) => diffMetric(baseMetrics.get(metric.id) ?? absentAsZero(metric, base), metric, noise));
   const headIds = new Set(headMetrics.map((m) => m.id));
   for (const [id, metric] of baseMetrics) {
     if (!headIds.has(id))
-      result.push(diffMetric(metric, void 0, noise));
+      result.push(diffMetric(metric, absentAsZero(metric, head), noise));
   }
   return result;
 }
@@ -42186,28 +42311,6 @@ function diffAssets(base, head, limit, rankBy) {
   }
   return top(diffs, limit, (d) => rankValue(d.delta, rankBy));
 }
-function packageTotals(app) {
-  const totals = /* @__PURE__ */ new Map();
-  const add = (scope, name, bytes2) => {
-    let byName = totals.get(scope);
-    if (!byName) {
-      byName = /* @__PURE__ */ new Map();
-      totals.set(scope, byName);
-    }
-    byName.set(name, (byName.get(name) ?? 0) + bytes2);
-  };
-  const sources = [
-    ...(app?.assets ?? []).filter((a) => a.type === "js").map((a) => ({ scope: "web", item: a })),
-    ...(app?.bundles ?? []).map((b) => ({ scope: b.platform, item: b }))
-  ];
-  for (const { scope, item } of sources) {
-    for (const pkg of item.packages ?? [])
-      add(scope, pkg.name, pkg.bytes);
-    if (item.firstPartyBytes !== void 0)
-      add(scope, null, item.firstPartyBytes);
-  }
-  return totals;
-}
 function diffPackages(base, head, limit) {
   const baseTotals = packageTotals(base);
   const headTotals = packageTotals(head);
@@ -42229,6 +42332,51 @@ function diffPackages(base, head, limit) {
     }
   }
   return top(diffs, limit, (d) => Math.abs(d.delta));
+}
+function versionTotals(app) {
+  const totals = /* @__PURE__ */ new Map();
+  for (const { scope, item } of attributedFiles(app)) {
+    for (const pkg of item.packages ?? []) {
+      if (pkg.versions === void 0)
+        continue;
+      const byName = totals.get(scope) ?? /* @__PURE__ */ new Map();
+      const byVersion = byName.get(pkg.name) ?? /* @__PURE__ */ new Map();
+      for (const { version: version3, bytes: bytes2 } of pkg.versions) {
+        byVersion.set(version3, (byVersion.get(version3) ?? 0) + bytes2);
+      }
+      byName.set(pkg.name, byVersion);
+      totals.set(scope, byName);
+    }
+  }
+  return totals;
+}
+function diffDuplicates(base, head, hasBase, limit) {
+  const baseTotals = versionTotals(base);
+  const duplicates = [];
+  for (const [scope, byName] of versionTotals(head)) {
+    for (const [name, byVersion] of byName) {
+      if (byVersion.size < 2)
+        continue;
+      const versions2 = [...byVersion].map(([version3, bytes2]) => {
+        const dependency = head?.dependencies?.find((d) => d.name === name && d.version === version3);
+        return {
+          version: version3,
+          bytes: bytes2,
+          ...dependency === void 0 ? {} : { direct: dependency.direct },
+          ...dependency?.via === void 0 ? {} : { via: dependency.via }
+        };
+      }).sort((a, b) => b.bytes - a.bytes || a.version.localeCompare(b.version));
+      duplicates.push({
+        scope,
+        name,
+        versions: versions2,
+        bytes: versions2.reduce((sum, v) => sum + v.bytes, 0),
+        ...hasBase ? { introduced: (baseTotals.get(scope)?.get(name)?.size ?? 0) < 2 } : {}
+      });
+    }
+  }
+  duplicates.sort((a, b) => Number(b.introduced === true) - Number(a.introduced === true) || b.bytes - a.bytes || a.name.localeCompare(b.name));
+  return { list: duplicates.slice(0, limit), omitted: Math.max(0, duplicates.length - limit) };
 }
 function diffArchiveEntries(base, head, limit) {
   const index = (archives) => new Map((archives ?? []).map((a) => [a.key, new Map(a.entries.map((e) => [e.path, e]))]));
@@ -42298,12 +42446,27 @@ function warningsFor(base, head) {
   if (bl !== "" && hl !== "" && bl !== hl) {
     warnings.push(`Lighthouse versions differ between base (${bl}) and head (${hl}).`);
   }
+  for (const [side, source] of [
+    ["base", base],
+    ["head", head]
+  ]) {
+    const contaminated = source.apps.flatMap((app) => (app.lighthouse ?? []).flatMap((entry) => {
+      const origins2 = entry.runs.flatMap((run3) => run3.contamination?.origins ?? []);
+      return origins2.length === 0 ? [] : [{ page: `${entry.url} (${entry.formFactor})`, origins: origins2 }];
+    }));
+    if (contaminated.length === 0)
+      continue;
+    const pages = contaminated.map((c) => c.page).join(", ");
+    const origins = [...new Set(contaminated.flatMap((c) => c.origins))].sort();
+    warnings.push(`Lighthouse ran with browser extensions active on ${side} for ${pages} (${origins.slice(0, 5).join(", ")}${origins.length > 5 ? ", \u2026" : ""}). Those scores are not comparable and are not checked against budgets.`);
+  }
   return warnings;
 }
 function diffApp(base, head, hasBase, options) {
   const app = head ?? base;
   const assets = diffAssets(base, head, options.top, options.rankBy);
   const packages = diffPackages(base, head, options.top);
+  const duplicates = diffDuplicates(base, head, hasBase, options.top);
   const archiveEntries = diffArchiveEntries(base, head, options.top);
   const explained = explain(packages.list, base, head);
   let status = "compared";
@@ -42324,11 +42487,13 @@ function diffApp(base, head, hasBase, options) {
     metrics: diffMetrics(base, head, options.noise),
     assets: hasBase ? assets.list : [],
     packages: hasBase ? explained.packages : [],
+    duplicates: duplicates.list,
     archiveEntries: archiveEntries.list,
     dependencies: hasBase ? explained.dependencies.slice(0, DEPENDENCY_LIMIT) : [],
     omitted: {
       assets: hasBase ? assets.omitted : 0,
       packages: hasBase ? packages.omitted : 0,
+      duplicates: duplicates.omitted,
       archiveEntries: archiveEntries.omitted,
       dependencies: hasBase ? Math.max(0, explained.dependencies.length - DEPENDENCY_LIMIT) : 0
     }
@@ -42489,7 +42654,13 @@ var DEFAULT_MAX_LENGTH2 = 6e4;
 var FRAMEWORK_LABEL = {
   vite: "Vite",
   next: "Next.js",
+  nuxt: "Nuxt",
+  "react-router": "React Router",
+  astro: "Astro",
+  sveltekit: "SvelteKit",
   webpack: "webpack",
+  rsbuild: "Rsbuild",
+  rspack: "Rspack",
   expo: "Expo",
   "react-native": "React Native",
   static: "Static site",
@@ -42542,6 +42713,8 @@ function icon(metric) {
     return "\u{1F195}";
   if (metric.change === "removed")
     return "\u2796";
+  if (metric.contamination !== void 0)
+    return "\u26A0\uFE0F";
   if (metric.change === "unchanged")
     return "\u26AA";
   if (metric.significance === "within-noise")
@@ -42573,6 +42746,8 @@ function changeCell(metric) {
   if (metric.delta === void 0)
     return "\u2013";
   const text2 = `${formatDelta(metric.delta, metric.unit)}${formatPercent(metric.percent)}`;
+  if (metric.contamination !== void 0)
+    return `${text2} <sub>not comparable</sub>`;
   if (metric.delta === 0)
     return text2;
   if (metric.significance === "within-noise")
@@ -42582,6 +42757,8 @@ function changeCell(metric) {
   return text2;
 }
 function visibleMetric(metric, compression) {
+  if (metric.group === "package")
+    return false;
   if (metric.compression === void 0)
     return true;
   if (metric.group === "bundle")
@@ -42631,6 +42808,12 @@ var SCOPE_LABEL = { web: "web", ios: "iOS", android: "Android" };
 function versionList(versions2) {
   return versions2.map((v) => inlineCode(v)).join(", ");
 }
+function reachText(cause) {
+  if (cause.chain !== void 0 && cause.chain.length > 1) {
+    return ` via ${cause.chain.map((name) => inlineCode(name)).join(" \u2192 ")}`;
+  }
+  return viaText(cause.via);
+}
 function viaText(via) {
   return via === void 0 || via.length === 0 ? "" : ` via ${via.map((v) => inlineCode(v)).join(", ")}`;
 }
@@ -42641,14 +42824,14 @@ function causeText(cause) {
     case "no-version-change":
       return "same version; more or less of it is imported";
     case "added":
-      return `added ${versionList(cause.head)}${cause.direct ? " (direct)" : viaText(cause.via)}`;
+      return `added ${versionList(cause.head)}${cause.direct ? " (direct)" : reachText(cause)}`;
     case "removed":
-      return `removed ${versionList(cause.base)}${cause.direct ? " (direct)" : viaText(cause.via)}`;
+      return `removed ${versionList(cause.base)}${cause.direct ? " (direct)" : reachText(cause)}`;
     case "upgraded":
     case "downgraded":
-      return `${cause.kind} ${versionList(cause.base)} \u2192 ${versionList(cause.head)}${cause.direct ? "" : viaText(cause.via)}`;
+      return `${cause.kind} ${versionList(cause.base)} \u2192 ${versionList(cause.head)}${cause.direct ? "" : reachText(cause)}`;
     case "changed":
-      return `versions ${versionList(cause.base)} \u2192 ${versionList(cause.head)}${cause.direct ? "" : viaText(cause.via)}`;
+      return `versions ${versionList(cause.base)} \u2192 ${versionList(cause.head)}${cause.direct ? "" : reachText(cause)}`;
   }
 }
 function safeUrl(url2) {
@@ -42687,6 +42870,36 @@ ${suggestions.join("\n")}` : "";
     "",
     [...header, ...rows].join("\n") + moreLine(app.omitted.packages, "package", "packages") + alternatives
   ].join("\n");
+}
+function duplicatesBlock(app) {
+  if (app.duplicates.length === 0)
+    return void 0;
+  const withStatus = app.duplicates.some((dup) => dup.introduced !== void 0);
+  const rows = app.duplicates.map((dup) => {
+    const versions2 = dup.versions.map((v) => `${inlineCode(v.version)} ${formatBytes(v.bytes)}${v.direct === true ? " (direct)" : viaText(v.via)}`).join(" \xB7 ");
+    const status = withStatus ? ` ${dup.introduced === true ? "**new**" : "existing"} |` : "";
+    return `| ${inlineCode(dup.name)} | ${SCOPE_LABEL[dup.scope]} | ${versions2} | ${formatBytes(dup.bytes)} |${status}`;
+  });
+  const table = [
+    withStatus ? "| Package | Bundle | Versions | Total | |" : "| Package | Bundle | Versions | Total |",
+    withStatus ? "| --- | --- | --- | --: | --- |" : "| --- | --- | --- | --: |",
+    ...rows
+  ].join("\n") + moreDuplicates(app.omitted.duplicates);
+  const introduced = app.duplicates.filter((dup) => dup.introduced === true).length;
+  if (withStatus && introduced === 0) {
+    const total = app.duplicates.length + app.omitted.duplicates;
+    return details(`${total} duplicate ${total === 1 ? "package" : "packages"} already in the base`, table);
+  }
+  return [
+    "**Duplicate packages** <sub>the same package bundled in more than one version</sub>",
+    "",
+    table
+  ].join("\n");
+}
+function moreDuplicates(count) {
+  return count > 0 ? `
+
+\u2026and ${count} more duplicate ${count === 1 ? "package" : "packages"}.` : "";
 }
 function dependenciesBlock(app) {
   if (app.dependencies.length === 0)
@@ -42737,6 +42950,7 @@ function appBlocks(app, headOnly, compression) {
   }
   for (const block of [
     packagesBlock(app),
+    duplicatesBlock(app),
     assetsBlock(app, compression),
     archiveEntriesBlock(app),
     dependenciesBlock(app)
@@ -42754,13 +42968,25 @@ function budgetValue(result, value) {
     return formatValue(value, result.unit);
   return formatDelta(value, result.unit);
 }
+var MAX_BUDGET_ROWS = 20;
 function budgetsBlock(evaluation) {
   if (evaluation.results.length === 0 && evaluation.unmatched.length === 0)
     return void 0;
-  const rows = evaluation.results.map((r) => `| ${BUDGET_ICON[r.status]} | ${inlineCode(r.appId)} | ${escapeText(r.label)} | ${r.limit} ${budgetValue(r, r.threshold)} | ${r.actual === void 0 ? "\u2013" : budgetValue(r, r.actual)} | ${escapeText(r.message)} |`);
+  const listed = evaluation.results.length <= MAX_BUDGET_ROWS ? evaluation.results : evaluation.results.filter((r) => r.status === "fail" || r.status === "warn");
+  const rows = listed.map((r) => `| ${BUDGET_ICON[r.status]} | ${inlineCode(r.appId)} | ${escapeText(r.label)} | ${r.limit} ${budgetValue(r, r.threshold)} | ${r.actual === void 0 ? "\u2013" : budgetValue(r, r.actual)} | ${escapeText(r.message)} |`);
   const lines = ["### Budgets"];
   if (rows.length > 0) {
     lines.push("", "| | App | Metric | Limit | Actual | Result |", "| :-: | --- | --- | --- | --: | --- |", ...rows);
+  }
+  if (listed.length < evaluation.results.length) {
+    const passed = evaluation.results.filter((r) => r.status === "pass").length;
+    const skipped = evaluation.results.length - listed.length - passed;
+    const counts = [
+      ...passed > 0 ? [`${passed} passed`] : [],
+      ...skipped > 0 ? [`${skipped} skipped`] : []
+    ].join(", ");
+    const lead = rows.length === 0 ? `${evaluation.results.length} budget checks` : "Not listed";
+    lines.push("", `${lead}: ${counts}.`);
   }
   if (evaluation.unmatched.length > 0) {
     const patterns = evaluation.unmatched.map((b) => `${inlineCode(b.app, { table: false })} / ${inlineCode(b.metric, { table: false })}`).join(", ");
@@ -42780,8 +43006,17 @@ function summaryLine(diff, evaluation) {
       parts.push(`\u274C ${failed} budget${failed === 1 ? "" : "s"} failed`);
     if (warned > 0)
       parts.push(`\u26A0\uFE0F ${warned} budget warning${warned === 1 ? "" : "s"}`);
-    if (failed === 0 && warned === 0)
-      parts.push("\u2705 all budgets pass");
+    const skipped = count("skipped");
+    if (failed === 0 && warned === 0) {
+      if (skipped === 0)
+        parts.push("\u2705 all budgets pass");
+      else if (skipped === evaluation.results.length)
+        parts.push(`\u23ED\uFE0F ${skipped} budget${skipped === 1 ? "" : "s"} skipped`);
+      else
+        parts.push(`\u2705 ${count("pass")} pass \xB7 \u23ED\uFE0F ${skipped} skipped`);
+    } else if (skipped > 0) {
+      parts.push(`\u23ED\uFE0F ${skipped} skipped`);
+    }
   }
   return parts.join(" \xB7 ");
 }
@@ -43151,8 +43386,20 @@ function detectFramework(pkg) {
     return "expo";
   if ("react-native" in deps)
     return "react-native";
+  if ("@react-router/dev" in deps)
+    return "react-router";
+  if ("nuxt" in deps)
+    return "nuxt";
+  if ("astro" in deps)
+    return "astro";
+  if ("@sveltejs/kit" in deps)
+    return "sveltekit";
   if ("vite" in deps)
     return "vite";
+  if ("@rsbuild/core" in deps)
+    return "rsbuild";
+  if ("@rspack/core" in deps || "@rspack/cli" in deps)
+    return "rspack";
   if ("webpack" in deps)
     return "webpack";
   return "static";
@@ -43160,9 +43407,21 @@ function detectFramework(pkg) {
 var DEFAULT_OUT_DIR = {
   next: ".next",
   expo: "dist",
+  astro: "dist",
+  // Client files; prerendered pages are written here too, the server build is not measured.
+  "react-router": "build/client",
+  // `nuxt generate` and `nuxt build` both write the client files and prerendered pages here.
+  nuxt: ".output/public",
+  // adapter-static writes the whole site here; see FALLBACK_OUT_DIRS for other adapters.
+  sveltekit: "build",
   vite: "dist",
   webpack: "dist",
+  rsbuild: "dist",
+  rspack: "dist",
   static: "dist"
+};
+var FALLBACK_OUT_DIRS = {
+  sveltekit: [".svelte-kit/output/client"]
 };
 
 // ../measure/dist/config.js
@@ -43248,7 +43507,13 @@ async function workspaceDirs(root) {
 var MEASURABLE = /* @__PURE__ */ new Set([
   "vite",
   "next",
+  "react-router",
+  "nuxt",
+  "astro",
+  "sveltekit",
   "webpack",
+  "rsbuild",
+  "rspack",
   "expo",
   "react-native"
 ]);
@@ -43268,24 +43533,167 @@ async function discoverApps(root) {
   return apps;
 }
 
-// ../measure/dist/git.js
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-var run = promisify(execFile);
-async function git(cwd, args) {
-  try {
-    const { stdout } = await run("git", args, { cwd, timeout: 1e4 });
-    return stdout.trim();
-  } catch {
-    return void 0;
+// ../measure/dist/html-routes.js
+import { readFile as readFile3 } from "node:fs/promises";
+import { join as join4, posix } from "node:path";
+var MAX_FILES = 5e3;
+var MAX_IMPORTS = 5e3;
+var FALLBACK_PAGES = /* @__PURE__ */ new Set(["200.html", "404.html", "__spa-fallback.html"]);
+function pageRoute(file2) {
+  if (file2 === "index.html")
+    return "/";
+  if (file2.endsWith("/index.html"))
+    return `/${file2.slice(0, -"index.html".length)}`;
+  return `/${file2.slice(0, -".html".length)}`;
+}
+var MAX_TAG = 4e3;
+function* htmlTags(html, names) {
+  const lower = html.toLowerCase();
+  let at = lower.indexOf("<");
+  while (at !== -1) {
+    let end = at + 1;
+    while (end < lower.length && end - at <= 16 && /[a-z0-9]/.test(lower[end]))
+      end += 1;
+    const name = lower.slice(at + 1, end);
+    if (names.has(name)) {
+      const close = html.indexOf(">", end);
+      if (close === -1)
+        return;
+      if (close - end <= MAX_TAG)
+        yield [name, html.slice(end, close)];
+      at = lower.indexOf("<", close + 1);
+    } else {
+      at = lower.indexOf("<", end);
+    }
   }
 }
-function gitRoot(dir) {
-  return git(dir, ["rev-parse", "--show-toplevel"]);
+var LOADING_TAGS = /* @__PURE__ */ new Set(["script", "link"]);
+var ISLAND_ATTRIBUTE = /(?<![\w-])(?:component-url|renderer-url|before-hydration-url)\s*=\s*"([^"]{1,1000})"/g;
+var DYNAMIC_IMPORT = /\bimport\(\s*(["'`])([^"'`\\\n]{1,1000})\1\s*\)/g;
+function attribute(tag, name) {
+  const match = new RegExp(`(?<![\\w-])${name}\\s*=\\s*(?:"([^"]{0,1000})"|'([^']{0,1000})'|([^\\s"'>]{1,1000}))`, "i").exec(tag);
+  return match?.[1] ?? match?.[2] ?? match?.[3];
 }
-function gitHead(dir) {
-  return git(dir, ["rev-parse", "HEAD"]);
+function referencedUrls(html) {
+  const urls = /* @__PURE__ */ new Set();
+  for (const [name, attributes] of htmlTags(html, LOADING_TAGS)) {
+    if (name === "script") {
+      const src = attribute(attributes, "src");
+      if (src !== void 0)
+        urls.add(src);
+      continue;
+    }
+    const rel = (attribute(attributes, "rel") ?? "").toLowerCase().split(/\s+/);
+    const as = (attribute(attributes, "as") ?? "").toLowerCase();
+    const loads = rel.includes("stylesheet") || rel.includes("modulepreload") || rel.includes("preload") && (as === "script" || as === "style");
+    const href = loads ? attribute(attributes, "href") : void 0;
+    if (href !== void 0)
+      urls.add(href);
+  }
+  for (const match of html.matchAll(ISLAND_ATTRIBUTE))
+    urls.add(match[1]);
+  for (const match of html.matchAll(DYNAMIC_IMPORT))
+    urls.add(match[2]);
+  return [...urls];
 }
+var IMPORT_STATEMENT = /^(?:import|export)\s*(?:(?:\*(?:\s*as\s+[\w$]+)?|\{[^}]{0,1500}\}|[\w$]+(?:\s*,\s*\{[^}]{0,1500}\})?)\s*from\s*)?(["'])([^"'\n]{1,500})\1\s*$/;
+function startsStatement(code, at) {
+  let index = at - 1;
+  while (index >= 0 && (code[index] === " " || code[index] === "	" || code[index] === "\r"))
+    index -= 1;
+  return index < 0 || code[index] === ";" || code[index] === "}" || code[index] === "\n";
+}
+function staticImports(code) {
+  const found = /* @__PURE__ */ new Set();
+  for (const keyword of ["import", "export"]) {
+    let at = code.indexOf(keyword);
+    while (at !== -1 && found.size < MAX_IMPORTS) {
+      if (startsStatement(code, at)) {
+        const window = code.slice(at, at + 2e3);
+        const end = window.search(/[;\n]/);
+        const statement = end === -1 ? window : window.slice(0, end);
+        const specifier = IMPORT_STATEMENT.exec(statement)?.[2];
+        if (specifier !== void 0 && /^(?:\.{1,2}\/|\/)/.test(specifier))
+          found.add(specifier);
+      }
+      at = code.indexOf(keyword, at + keyword.length);
+    }
+  }
+  return [...found];
+}
+function resolveUrl(url2, pageDir, files) {
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url2) || url2.startsWith("//"))
+    return void 0;
+  const end = url2.search(/[?#]/);
+  const raw = end === -1 ? url2 : url2.slice(0, end);
+  let path;
+  try {
+    path = decodeURIComponent(raw);
+  } catch {
+    path = raw;
+  }
+  const rooted = path.startsWith("/");
+  const normalized = posix.normalize(rooted ? path.slice(1) : posix.join(pageDir, path));
+  if (normalized === ".." || normalized.startsWith("../"))
+    return void 0;
+  if (files.has(normalized))
+    return normalized;
+  if (rooted) {
+    const parts = normalized.split("/");
+    for (let index = 1; index < parts.length; index += 1) {
+      const tail = parts.slice(index).join("/");
+      if (files.has(tail))
+        return tail;
+    }
+  }
+  return void 0;
+}
+var isScript = (file2) => file2.endsWith(".js") || file2.endsWith(".mjs");
+async function htmlRoutes(outDir, keys) {
+  const files = new Set(keys.keys());
+  const pages = [...files].filter((file2) => file2.endsWith(".html") && !FALLBACK_PAGES.has(file2)).sort();
+  if (pages.length === 0)
+    return void 0;
+  const imports = /* @__PURE__ */ new Map();
+  const importsOf = async (file2) => {
+    const cached2 = imports.get(file2);
+    if (cached2 !== void 0)
+      return cached2;
+    const dir = posix.dirname(file2);
+    const code = await readFile3(join4(outDir, file2), "utf8");
+    const resolved = staticImports(code).map((specifier) => resolveUrl(specifier, dir, files)).filter((target) => target !== void 0);
+    imports.set(file2, resolved);
+    return resolved;
+  };
+  const routes = [];
+  for (const page of pages) {
+    const html = await readFile3(join4(outDir, page), "utf8");
+    const dir = posix.dirname(page);
+    const loaded = /* @__PURE__ */ new Set();
+    const queue = referencedUrls(html).map((url2) => resolveUrl(url2, dir, files)).filter((target) => target !== void 0);
+    while (queue.length > 0 && loaded.size < MAX_FILES) {
+      const file2 = queue.shift();
+      if (loaded.has(file2))
+        continue;
+      loaded.add(file2);
+      if (isScript(file2))
+        queue.push(...await importsOf(file2));
+    }
+    routes.push({
+      route: pageRoute(page),
+      assets: [...loaded].map((file2) => keys.get(file2)).filter((key) => key !== void 0)
+    });
+  }
+  return routes.sort((a, b) => a.route.localeCompare(b.route));
+}
+
+// ../measure/dist/route-media.js
+import { readFile as readFile7 } from "node:fs/promises";
+import { join as join9, posix as posix5, relative as relative2, sep as sep2 } from "node:path";
+
+// ../measure/dist/web.js
+import { readFile as readFile6, readdir as readdir2, stat as stat3 } from "node:fs/promises";
+import { join as join8, posix as posix4, relative, sep } from "node:path";
 
 // ../measure/dist/hash.js
 var EXTENSION = /(\.[A-Za-z0-9]+)$/;
@@ -43294,8 +43702,8 @@ function isBase64UrlHash(segment) {
     return false;
   return /[\d_-]/.test(segment) || /[a-z]/.test(segment) && /[A-Z]/.test(segment);
 }
-function isHexHash(segment) {
-  return /^[0-9a-f]{16,64}$/.test(segment) && /\d/.test(segment);
+function isHexHash(segment, min = 16) {
+  return segment.length >= min && /^[0-9a-f]{10,64}$/.test(segment) && /\d/.test(segment);
 }
 function stableKey(path) {
   const slash = path.lastIndexOf("/");
@@ -43307,9 +43715,10 @@ function stableKey(path) {
   const stem = base.slice(0, -extension.length);
   if (isHexHash(stem))
     return `${dir}[hash]${extension}`;
-  const hex3 = /^(.*[-.])([0-9a-f]{16,64})$/.exec(stem);
-  if (hex3?.[2] !== void 0 && isHexHash(hex3[2]))
+  const hex3 = /^(.*[-.])([0-9a-f]{10,64})$/.exec(stem);
+  if (hex3?.[2] !== void 0 && isHexHash(hex3[2], 10)) {
     return `${dir}${hex3[1] ?? ""}[hash]${extension}`;
+  }
   const prefix = stem.slice(0, -9);
   const separator = stem.at(-9);
   const candidate = stem.slice(-8);
@@ -43334,614 +43743,9 @@ function assignKeys(files) {
   return keys;
 }
 
-// ../measure/dist/lockfile/index.js
-import { readFile as readFile3, readdir as readdir2 } from "node:fs/promises";
-import { dirname, join as join4, relative, resolve as resolve4, sep } from "node:path";
-
-// ../measure/dist/lockfile/graph.js
-var LockfileError = class extends Error {
-  name = "LockfileError";
-};
-var MAX_VIA = 3;
-function dependenciesOf(graph, importerPath) {
-  const importer = graph.importers.get(importerPath);
-  if (importer === void 0) {
-    throw new LockfileError(`the lockfile has no entry for "${importerPath}"`);
-  }
-  const found = /* @__PURE__ */ new Map();
-  const walk = (start, root, prod) => {
-    const queue = [{ id: start, depth: 0 }];
-    const seen = /* @__PURE__ */ new Set();
-    while (queue.length > 0) {
-      const item = queue.shift();
-      if (seen.has(item.id))
-        continue;
-      seen.add(item.id);
-      const node2 = graph.nodes.get(item.id);
-      if (node2 === void 0)
-        continue;
-      if (node2.workspace === void 0) {
-        const key = `${node2.name}@${node2.version}`;
-        const acc = found.get(key) ?? {
-          name: node2.name,
-          version: node2.version,
-          direct: false,
-          prod: false,
-          via: /* @__PURE__ */ new Set()
-        };
-        if (item.depth === 0)
-          acc.direct = true;
-        else if (acc.via.size < MAX_VIA)
-          acc.via.add(root);
-        if (prod)
-          acc.prod = true;
-        found.set(key, acc);
-      }
-      for (const child of node2.deps)
-        queue.push({ id: child, depth: item.depth + 1 });
-    }
-  };
-  for (const dep of importer.prod)
-    walk(dep.id, dep.name, true);
-  for (const dep of importer.dev)
-    walk(dep.id, dep.name, false);
-  return [...found.values()].map((acc) => ({
-    name: acc.name,
-    version: acc.version,
-    direct: acc.direct,
-    ...acc.prod ? {} : { dev: true },
-    ...acc.direct || acc.via.size === 0 ? {} : { via: [...acc.via].sort() }
-  })).sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
-}
-
-// ../measure/dist/lockfile/bun.js
-function stripTrailingCommas(text2) {
-  let out = "";
-  let inString = false;
-  for (let i = 0; i < text2.length; i += 1) {
-    const char = text2[i];
-    if (inString) {
-      out += char;
-      if (char === "\\") {
-        out += text2[i + 1] ?? "";
-        i += 1;
-      } else if (char === '"') {
-        inString = false;
-      }
-      continue;
-    }
-    if (char === '"') {
-      inString = true;
-    } else if (char === ",") {
-      let j = i + 1;
-      while (j < text2.length && /\s/.test(text2[j]))
-        j += 1;
-      if (text2[j] === "}" || text2[j] === "]")
-        continue;
-    }
-    out += char;
-  }
-  return out;
-}
-function keySegments(key) {
-  const parts = key.split("/");
-  const segments = [];
-  for (let i = 0; i < parts.length; i += 1) {
-    const part = parts[i];
-    if (part.startsWith("@") && i + 1 < parts.length) {
-      segments.push(`${part}/${parts[i + 1]}`);
-      i += 1;
-    } else {
-      segments.push(part);
-    }
-  }
-  return segments;
-}
-function parseResolution(resolution) {
-  const at = resolution.indexOf("@", 1);
-  if (at === -1)
-    return { name: resolution, version: "" };
-  return { name: resolution.slice(0, at), version: resolution.slice(at + 1) };
-}
-function resolutionOf(entry) {
-  const first = entry?.[0];
-  return typeof first === "string" ? first : "";
-}
-function resolve2(packages, scope, name) {
-  const segments = scope === "" ? [] : keySegments(scope);
-  for (let length = segments.length; length >= 0; length -= 1) {
-    const candidate = [...segments.slice(0, length), name].join("/");
-    if (candidate in packages)
-      return candidate;
-  }
-  return void 0;
-}
-function parseBunLock(text2) {
-  let lock;
-  try {
-    lock = JSON.parse(stripTrailingCommas(text2));
-  } catch {
-    throw new LockfileError("bun.lock is not valid JSON");
-  }
-  if (lock.workspaces === void 0 || lock.packages === void 0) {
-    throw new LockfileError('unsupported bun.lock: "workspaces" and "packages" are required');
-  }
-  const packages = lock.packages;
-  const workspaces = lock.workspaces;
-  const workspaceKey = /* @__PURE__ */ new Map([["", ""]]);
-  for (const [key, entry] of Object.entries(packages)) {
-    const { version: version3 } = parseResolution(resolutionOf(entry));
-    if (version3.startsWith("workspace:"))
-      workspaceKey.set(version3.slice("workspace:".length), key);
-  }
-  const nodeId = (key) => {
-    const { version: version3 } = parseResolution(resolutionOf(packages[key]));
-    return version3.startsWith("workspace:") ? `workspace:${version3.slice(10)}` : key;
-  };
-  const resolveId = (scope, name) => {
-    const key = resolve2(packages, scope, name);
-    return key === void 0 ? void 0 : nodeId(key);
-  };
-  const nodes = /* @__PURE__ */ new Map();
-  const importers = /* @__PURE__ */ new Map();
-  for (const [key, entry] of Object.entries(packages)) {
-    const { name, version: version3 } = parseResolution(resolutionOf(entry));
-    if (version3.startsWith("workspace:"))
-      continue;
-    const info = entry.find((item, index) => index > 0 && typeof item === "object") ?? {};
-    const runtime = {
-      ...info.dependencies,
-      ...info.optionalDependencies,
-      ...info.peerDependencies
-    };
-    nodes.set(key, {
-      name,
-      version: version3,
-      deps: Object.keys(runtime).flatMap((dep) => resolveId(key, dep) ?? [])
-    });
-  }
-  for (const [path, workspace] of Object.entries(workspaces)) {
-    const scope = workspaceKey.get(path) ?? "";
-    const list = (record2) => Object.keys(record2 ?? {}).flatMap((dep) => {
-      const id = resolveId(scope, dep);
-      return id === void 0 ? [] : [{ name: dep, id }];
-    });
-    const prod = list({
-      ...workspace.dependencies,
-      ...workspace.optionalDependencies,
-      ...workspace.peerDependencies
-    });
-    const importerPath = path === "" ? "." : path;
-    nodes.set(`workspace:${path}`, {
-      name: workspace.name ?? importerPath,
-      version: workspace.version ?? "0.0.0",
-      workspace: importerPath,
-      deps: prod.map((d) => d.id)
-    });
-    importers.set(importerPath, { prod, dev: list(workspace.devDependencies) });
-  }
-  return { format: "bun", importers, nodes };
-}
-
-// ../measure/dist/lockfile/npm.js
-var MARKER = "node_modules/";
-function nameFromLocation(location) {
-  const index = location.lastIndexOf(MARKER);
-  return index === -1 ? location : location.slice(index + MARKER.length);
-}
-function resolve3(packages, from, name) {
-  const segments = from === "" ? [] : from.split("/");
-  for (let length = segments.length; length >= 0; length -= 1) {
-    if (length > 0 && segments[length - 1] === "node_modules")
-      continue;
-    const prefix = segments.slice(0, length).join("/");
-    const candidate = prefix === "" ? `${MARKER}${name}` : `${prefix}/${MARKER}${name}`;
-    if (candidate in packages)
-      return candidate;
-  }
-  return void 0;
-}
-function parseNpmLock(text2) {
-  let lock;
-  try {
-    lock = JSON.parse(text2);
-  } catch {
-    throw new LockfileError("package-lock.json is not valid JSON");
-  }
-  if (lock.packages === void 0 || (lock.lockfileVersion ?? 0) < 2) {
-    throw new LockfileError("unsupported package-lock.json: lockfile version 2 or 3 is required (npm 7+)");
-  }
-  const packages = lock.packages;
-  const nodes = /* @__PURE__ */ new Map();
-  const importers = /* @__PURE__ */ new Map();
-  const target = (location) => {
-    const entry = packages[location];
-    return entry?.link === true && entry.resolved !== void 0 ? entry.resolved : location;
-  };
-  for (const [location, entry] of Object.entries(packages)) {
-    if (entry.link === true)
-      continue;
-    const runtime = {
-      ...entry.dependencies,
-      ...entry.optionalDependencies,
-      ...entry.peerDependencies
-    };
-    const deps = Object.keys(runtime).map((name) => resolve3(packages, location, name)).filter((id) => id !== void 0).map(target);
-    const isWorkspace = !location.includes(MARKER);
-    const path = location === "" ? "." : location;
-    nodes.set(location, {
-      name: entry.name ?? nameFromLocation(location),
-      version: entry.version ?? "0.0.0",
-      ...isWorkspace ? { workspace: path } : {},
-      deps
-    });
-    if (isWorkspace) {
-      const list = (record2) => Object.keys(record2 ?? {}).flatMap((name) => {
-        const id = resolve3(packages, location, name);
-        return id === void 0 ? [] : [{ name, id: target(id) }];
-      });
-      importers.set(path, {
-        prod: list({ ...entry.dependencies, ...entry.optionalDependencies }),
-        dev: list(entry.devDependencies)
-      });
-    }
-  }
-  return { format: "npm", importers, nodes };
-}
-
-// ../measure/dist/lockfile/pnpm.js
-var import_yaml2 = __toESM(require_dist(), 1);
-import { posix } from "node:path";
-function stripPeers(version3) {
-  const paren = version3.indexOf("(");
-  return paren === -1 ? version3 : version3.slice(0, paren);
-}
-function splitKey(key) {
-  const clean2 = key.startsWith("/") ? key.slice(1) : key;
-  const base = stripPeers(clean2);
-  const at = base.lastIndexOf("@");
-  if (at <= 0)
-    throw new LockfileError(`unexpected pnpm package key "${key}"`);
-  return { name: base.slice(0, at), version: base.slice(at + 1) };
-}
-function parsePnpmLock(text2) {
-  const lock = (0, import_yaml2.parse)(text2);
-  const version3 = Number.parseFloat(String(lock?.lockfileVersion ?? ""));
-  if (lock === null || !(version3 >= 6 && version3 < 10)) {
-    throw new LockfileError(`unsupported pnpm lockfile version "${String(lock?.lockfileVersion)}" (6.x and 9.x are supported)`);
-  }
-  const v9 = version3 >= 9;
-  const graphSource = (v9 ? lock.snapshots : lock.packages) ?? {};
-  const prefix = v9 ? "" : "/";
-  const nodes = /* @__PURE__ */ new Map();
-  const ref = (name, versionRef, from) => {
-    if (versionRef.startsWith("link:")) {
-      return `workspace:${posix.normalize(posix.join(from, versionRef.slice(5)))}`;
-    }
-    const looksAliased = stripPeers(versionRef).slice(1).includes("@");
-    return looksAliased ? `${prefix}${versionRef}` : `${prefix}${name}@${versionRef}`;
-  };
-  for (const [key, snapshot] of Object.entries(graphSource)) {
-    const { name, version: resolved } = splitKey(key);
-    const deps = Object.entries({ ...snapshot.dependencies, ...snapshot.optionalDependencies }).map(([dep, v]) => ref(dep, v, "."));
-    nodes.set(key, { name, version: resolved, deps });
-  }
-  const importers = /* @__PURE__ */ new Map();
-  for (const [path, deps] of Object.entries(lock.importers ?? {})) {
-    const list = (record2) => Object.entries(record2 ?? {}).map(([name, value]) => ({
-      name,
-      id: ref(name, value.version, path)
-    }));
-    const prod = [...list(deps.dependencies), ...list(deps.optionalDependencies)];
-    const dev = list(deps.devDependencies);
-    importers.set(path, { prod, dev });
-    nodes.set(`workspace:${posix.normalize(path)}`, {
-      name: path,
-      version: "0.0.0",
-      workspace: path,
-      deps: prod.map((dep) => dep.id)
-    });
-  }
-  return { format: "pnpm", importers, nodes };
-}
-
-// ../measure/dist/lockfile/yarn.js
-var import_yaml3 = __toESM(require_dist(), 1);
-function descriptorName(descriptor) {
-  const at = descriptor.indexOf("@", descriptor.startsWith("@") ? 1 : 0);
-  return at === -1 ? descriptor : descriptor.slice(0, at);
-}
-function unquote(text2) {
-  const trimmed = text2.trim();
-  return trimmed.startsWith('"') && trimmed.endsWith('"') ? trimmed.slice(1, -1) : trimmed;
-}
-function parseClassic(text2) {
-  const entries2 = /* @__PURE__ */ new Map();
-  let current;
-  let section;
-  for (const line of text2.split(/\r?\n/)) {
-    if (line.trim() === "" || line.startsWith("#"))
-      continue;
-    if (!line.startsWith(" ")) {
-      current = { version: "", dependencies: {} };
-      section = void 0;
-      const entry = current;
-      for (const descriptor of line.replace(/:$/, "").split(","))
-        entries2.set(unquote(descriptor), entry);
-      continue;
-    }
-    if (current === void 0)
-      throw new LockfileError("malformed yarn.lock: indented line before the first entry");
-    const indent = line.length - line.trimStart().length;
-    const content = line.trim();
-    if (indent === 2) {
-      section = content.endsWith(":") ? content.slice(0, -1) : void 0;
-      const version3 = /^version "?([^"]+)"?$/.exec(content);
-      if (version3?.[1] !== void 0)
-        current.version = version3[1];
-    } else if (indent === 4 && (section === "dependencies" || section === "optionalDependencies")) {
-      const space = content.lastIndexOf(" ");
-      current.dependencies[unquote(content.slice(0, space))] = unquote(content.slice(space + 1));
-    }
-  }
-  return entries2;
-}
-function parseBerry(text2) {
-  const doc = (0, import_yaml3.parse)(text2);
-  const entries2 = /* @__PURE__ */ new Map();
-  for (const [key, value] of Object.entries(doc ?? {})) {
-    if (key === "__metadata")
-      continue;
-    const entry = {
-      version: String(value.version ?? "0.0.0"),
-      ...value.resolution === void 0 ? {} : { resolution: value.resolution },
-      dependencies: { ...value.dependencies, ...value.optionalDependencies }
-    };
-    for (const descriptor of key.split(","))
-      entries2.set(descriptor.trim(), entry);
-  }
-  return entries2;
-}
-function parseYarnLock(text2, workspaces) {
-  const berry = /^__metadata:/m.test(text2);
-  const entries2 = berry ? parseBerry(text2) : parseClassic(text2);
-  const nodes = /* @__PURE__ */ new Map();
-  const ids = /* @__PURE__ */ new Map();
-  const workspaceByName = /* @__PURE__ */ new Map();
-  for (const workspace of workspaces) {
-    if (workspace.manifest.name !== void 0)
-      workspaceByName.set(workspace.manifest.name, workspace.path);
-  }
-  const idOf = (entry, descriptor) => {
-    const existing = ids.get(entry);
-    if (existing !== void 0)
-      return existing;
-    const workspace = /@workspace:(.+)$/.exec(entry.resolution ?? "")?.[1];
-    const id = workspace === void 0 ? `${descriptorName(descriptor)}@${entry.version}` : `workspace:${workspace}`;
-    ids.set(entry, id);
-    return id;
-  };
-  const lookup = (name, range) => {
-    const entry = entries2.get(`${name}@${range}`) ?? (berry ? void 0 : entries2.get(`${name}@npm:${range}`));
-    if (entry !== void 0)
-      return idOf(entry, `${name}@${range}`);
-    const workspace = workspaceByName.get(name);
-    return workspace === void 0 ? void 0 : `workspace:${workspace}`;
-  };
-  for (const [descriptor, entry] of entries2) {
-    const id = idOf(entry, descriptor);
-    if (nodes.has(id))
-      continue;
-    const workspace = id.startsWith("workspace:") ? id.slice("workspace:".length) : void 0;
-    const deps = Object.entries(entry.dependencies).map(([name, range]) => lookup(name, range)).filter((child) => child !== void 0);
-    nodes.set(id, {
-      name: descriptorName(descriptor),
-      version: entry.version,
-      ...workspace === void 0 ? {} : { workspace },
-      deps
-    });
-  }
-  const importers = /* @__PURE__ */ new Map();
-  for (const workspace of workspaces) {
-    const list = (record2) => Object.entries(record2 ?? {}).flatMap(([name, range]) => {
-      const id2 = lookup(name, berry && !range.includes(":") ? `npm:${range}` : range);
-      return id2 === void 0 ? [] : [{ name, id: id2 }];
-    });
-    const prod = list({
-      ...workspace.manifest.dependencies,
-      ...workspace.manifest.optionalDependencies
-    });
-    const dev = list(workspace.manifest.devDependencies);
-    importers.set(workspace.path, { prod, dev });
-    const id = `workspace:${workspace.path}`;
-    if (!nodes.has(id))
-      nodes.set(id, {
-        name: workspace.manifest.name ?? workspace.path,
-        version: "0.0.0",
-        workspace: workspace.path,
-        deps: prod.map((dep) => dep.id)
-      });
-  }
-  return { format: berry ? "yarn-berry" : "yarn-classic", importers, nodes };
-}
-
-// ../measure/dist/lockfile/index.js
-var LOCKFILES = [
-  "pnpm-lock.yaml",
-  "package-lock.json",
-  "npm-shrinkwrap.json",
-  "yarn.lock",
-  "bun.lock",
-  "bun.lockb"
-];
-async function findLockfile(startDir, stopDir) {
-  let dir = resolve4(startDir);
-  const stop2 = stopDir === void 0 ? void 0 : resolve4(stopDir);
-  for (; ; ) {
-    const names = new Set(await readdir2(dir).catch(() => []));
-    const name = LOCKFILES.find((candidate) => names.has(candidate));
-    if (name !== void 0)
-      return { path: join4(dir, name), name };
-    const parent = dirname(dir);
-    if (parent === dir || dir === stop2)
-      return void 0;
-    dir = parent;
-  }
-}
-async function expandWorkspaces(root, patterns) {
-  const result = /* @__PURE__ */ new Set();
-  for (const pattern of patterns) {
-    if (pattern.startsWith("!"))
-      continue;
-    if (pattern.endsWith("/*")) {
-      const base = pattern.slice(0, -2);
-      const entries2 = await readdir2(join4(root, base), { withFileTypes: true }).catch(() => []);
-      for (const entry of entries2)
-        if (entry.isDirectory())
-          result.add(`${base}/${entry.name}`);
-    } else if (!pattern.includes("*")) {
-      result.add(pattern.replace(/\/$/, ""));
-    }
-  }
-  return [...result].sort();
-}
-async function yarnWorkspaces(root) {
-  const manifest = await readPackageJson(root);
-  if (manifest === void 0)
-    throw new LockfileError(`no package.json next to ${join4(root, "yarn.lock")}`);
-  const declared = manifest.workspaces;
-  const patterns = declared === void 0 ? [] : "packages" in declared ? declared.packages ?? [] : declared;
-  const workspaces = [{ path: ".", manifest }];
-  for (const path of await expandWorkspaces(root, patterns)) {
-    const child = await readPackageJson(join4(root, path));
-    if (child !== void 0)
-      workspaces.push({ path, manifest: child });
-  }
-  return workspaces;
-}
-async function readLockGraph(location) {
-  const text2 = location.name === "bun.lockb" ? "" : await readFile3(location.path, "utf8");
-  switch (location.name) {
-    case "pnpm-lock.yaml":
-      return parsePnpmLock(text2);
-    case "package-lock.json":
-    case "npm-shrinkwrap.json":
-      return parseNpmLock(text2);
-    case "yarn.lock":
-      return parseYarnLock(text2, await yarnWorkspaces(dirname(location.path)));
-    case "bun.lock":
-      return parseBunLock(text2);
-    case "bun.lockb":
-      throw new LockfileError(`${location.path} is Bun's binary lockfile, which usertax cannot read: run \`bun install --save-text-lockfile\` to write bun.lock (the default since Bun 1.2)`);
-  }
-}
-async function readAppDependencies(appDir, stopDir) {
-  const lockfile = await findLockfile(appDir, stopDir);
-  if (lockfile === void 0)
-    return void 0;
-  const graph = await readLockGraph(lockfile);
-  const importer = relative(dirname(lockfile.path), resolve4(appDir)).split(sep).join("/") || ".";
-  return { lockfile, format: graph.format, dependencies: dependenciesOf(graph, importer) };
-}
-
-// ../measure/dist/lighthouse.js
-import { createRequire } from "node:module";
-import { join as join5 } from "node:path";
-import { pathToFileURL as pathToFileURL2 } from "node:url";
-var LighthouseError = class extends Error {
-  name = "LighthouseError";
-};
-function runFromResult(lhr) {
-  if (lhr.runtimeError !== void 0) {
-    throw new LighthouseError(`Lighthouse failed: ${lhr.runtimeError.code ?? ""} ${lhr.runtimeError.message ?? ""}`.trim());
-  }
-  const score = lhr.categories.performance?.score;
-  const value = (id) => {
-    const audit = lhr.audits[id]?.numericValue;
-    if (audit === void 0 || !Number.isFinite(audit))
-      throw new LighthouseError(`Lighthouse result has no ${id}`);
-    return audit;
-  };
-  if (score === void 0 || score === null)
-    throw new LighthouseError("Lighthouse result has no performance score");
-  return {
-    performance: Math.round(score * 100 * 10) / 10,
-    lcp: value("largest-contentful-paint"),
-    tbt: value("total-blocking-time"),
-    cls: value("cumulative-layout-shift")
-  };
-}
-async function load(name) {
-  try {
-    return await import(name);
-  } catch {
-  }
-  try {
-    const resolved = createRequire(join5(process.cwd(), "package.json")).resolve(name);
-    return await import(pathToFileURL2(resolved).href);
-  } catch {
-    throw new LighthouseError(`"${name}" is not installed. Lighthouse support needs the optional packages lighthouse and chrome-launcher: npm install -D lighthouse chrome-launcher`);
-  }
-}
-function pageKey(url2) {
-  const parsed = new URL(url2);
-  return `${parsed.pathname}${parsed.search}`;
-}
-async function runLighthouse(options) {
-  if (!Number.isInteger(options.runs) || options.runs < 1 || options.runs > 100) {
-    throw new LighthouseError("runs must be an integer between 1 and 100");
-  }
-  const warmup = options.warmup ?? 1;
-  if (!Number.isInteger(warmup) || warmup < 0 || warmup > 10) {
-    throw new LighthouseError("warmup must be an integer between 0 and 10");
-  }
-  const { default: lighthouse } = await load("lighthouse");
-  const launcher = await load("chrome-launcher");
-  const formFactor = options.formFactor ?? "mobile";
-  const config2 = formFactor === "desktop" ? (await load("lighthouse/core/config/desktop-config.js")).default : void 0;
-  const flags = ["--headless=new", "--disable-gpu", "--no-first-run"];
-  if (process.getuid?.() === 0)
-    flags.push("--no-sandbox");
-  const results = /* @__PURE__ */ new Map();
-  for (let run3 = 1 - warmup; run3 <= options.runs; run3 += 1) {
-    for (const url2 of options.urls) {
-      const chrome = await launcher.launch({
-        chromeFlags: flags,
-        ...options.chromePath === void 0 ? {} : { chromePath: options.chromePath }
-      });
-      try {
-        const result = await lighthouse(url2, { port: chrome.port, output: "json", logLevel: "error", onlyCategories: ["performance"] }, config2);
-        if (result === void 0)
-          throw new LighthouseError(`Lighthouse returned no result for ${url2}`);
-        const measured = runFromResult(result.lhr);
-        if (run3 < 1)
-          continue;
-        const entry = results.get(url2) ?? { version: result.lhr.lighthouseVersion, runs: [] };
-        entry.runs.push(measured);
-        results.set(url2, entry);
-        options.onRun?.(url2, run3, measured);
-      } finally {
-        await chrome.kill();
-      }
-    }
-  }
-  return options.urls.map((url2) => {
-    const entry = results.get(url2);
-    return { url: pageKey(url2), formFactor, lighthouseVersion: entry.version, runs: entry.runs };
-  });
-}
-
-// ../measure/dist/next.js
-import { readFile as readFile5, readdir as readdir4 } from "node:fs/promises";
-import { join as join8, relative as relative3, sep as sep3 } from "node:path";
-
-// ../measure/dist/web.js
-import { readFile as readFile4, readdir as readdir3, stat as stat3 } from "node:fs/promises";
-import { join as join7, posix as posix3, relative as relative2, sep as sep2 } from "node:path";
-
 // ../measure/dist/foreign.js
 import { stat as stat2 } from "node:fs/promises";
-import { join as join6 } from "node:path";
+import { join as join5 } from "node:path";
 
 // ../measure/dist/sourcemap.js
 import { posix as posix2 } from "node:path";
@@ -44195,12 +43999,48 @@ function packageOf(path) {
   }
   return first;
 }
+function withoutQuery(text2) {
+  const index = text2.indexOf("?");
+  return index === -1 ? text2 : text2.slice(0, index);
+}
+function installRoot(source, sourceRoot, mapDir) {
+  const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
+  const clean2 = withoutQuery((webpack?.[1] ?? source).replace(/^\0/, "").replace(/^[a-z]+:\/\/\/?/i, ""));
+  const project = clean2.startsWith("[project]/") ? clean2.slice("[project]/".length) : void 0;
+  const full = project ?? (posix2.isAbsolute(clean2) ? clean2 : void 0);
+  const path = posix2.normalize(full ?? (webpack !== null ? clean2 : posix2.join(mapDir, sourceRoot ?? "", clean2)));
+  const marker = "/node_modules/";
+  const name = packageOf(path);
+  if (name === void 0)
+    return void 0;
+  const root = path.slice(0, `/${path}`.lastIndexOf(marker) + marker.length + name.length - 1);
+  const segments = root.replace(/^(\.\.\/)+/, "").split("/");
+  const absolute = root.startsWith("/");
+  if (segments.slice(absolute ? 1 : 0).some((s) => s === "" || s === "." || s === "..") || root.includes("\\")) {
+    return void 0;
+  }
+  return { name, root };
+}
+var VERSION_TEXT = /^[0-9A-Za-z][0-9A-Za-z.+_~-]{0,63}$/;
+function isVersionText(text2) {
+  return typeof text2 === "string" && VERSION_TEXT.test(text2);
+}
+function pnpmVersion({ name, root }) {
+  const folder = /(?:^|\/)node_modules\/\.pnpm\/([^/]+)\/node_modules\//.exec(`${root}/`)?.[1];
+  const prefix = `${name.replaceAll("/", "+")}@`;
+  if (folder?.startsWith(prefix) !== true)
+    return void 0;
+  const version3 = folder.slice(prefix.length).split(/[_(]/)[0];
+  return isVersionText(version3) ? version3 : void 0;
+}
 function displayPath(source, sourceRoot, mapDir) {
   const virtual = source.startsWith("\0");
   const webpack = /^webpack:\/\/[^/]*\/(.*)$/s.exec(source);
-  const clean2 = (webpack?.[1] ?? source).replace(/^\0/, "").replace(/^[a-z]+:\/\/\/?/i, "").replace(/\?.*$/, "");
+  const clean2 = withoutQuery((webpack?.[1] ?? source).replace(/^\0/, "").replace(/^[a-z]+:\/\/\/?/i, ""));
   if (virtual)
     return `(virtual) ${clean2}`;
+  if (source.startsWith("webpack://webpack/runtime/"))
+    return `(virtual) webpack/${clean2}`;
   if (webpack !== null) {
     if (clean2 === "" || clean2.startsWith("webpack/") || clean2.includes("|")) {
       const name = clean2.startsWith("webpack/") ? clean2.slice("webpack/".length) : clean2;
@@ -44226,13 +44066,15 @@ function isOutsideRepository(path, appPath) {
   const resolved = posix2.normalize(posix2.join(appPath, path));
   return resolved === ".." || resolved.startsWith("../");
 }
-function classifySources(sourceBytes, map2, mapDir, isForeign = () => false) {
+function classifySources(sourceBytes, map2, mapDir, isForeign = () => false, versionOf) {
   const modules = /* @__PURE__ */ new Map();
   const packages = /* @__PURE__ */ new Map();
+  const perVersion = /* @__PURE__ */ new Map();
   let firstParty = 0;
   let foreign = 0;
   for (const [sourceIndex, bytes2] of sourceBytes) {
-    const path = displayPath(map2.sources[sourceIndex], map2.sourceRoot, mapDir);
+    const source = map2.sources[sourceIndex];
+    const path = displayPath(source, map2.sourceRoot, mapDir);
     const pkg = packageOf(path);
     if (pkg === void 0 && isForeign(path)) {
       foreign += bytes2;
@@ -44242,13 +44084,22 @@ function classifySources(sourceBytes, map2, mapDir, isForeign = () => false) {
       ...pkg === void 0 ? {} : { package: pkg },
       bytes: (modules.get(path)?.bytes ?? 0) + bytes2
     });
-    if (pkg === void 0)
+    if (pkg === void 0) {
       firstParty += bytes2;
-    else
-      packages.set(pkg, (packages.get(pkg) ?? 0) + bytes2);
+      continue;
+    }
+    packages.set(pkg, (packages.get(pkg) ?? 0) + bytes2);
+    const copy = installRoot(source, map2.sourceRoot, mapDir);
+    const version3 = copy === void 0 ? void 0 : pnpmVersion(copy) ?? versionOf?.(copy);
+    if (copy?.name === pkg && version3 !== void 0) {
+      const byVersion = perVersion.get(pkg) ?? /* @__PURE__ */ new Map();
+      byVersion.set(version3, (byVersion.get(version3) ?? 0) + bytes2);
+      perVersion.set(pkg, byVersion);
+    }
   }
   return {
     packages,
+    versions: new Map([...perVersion].filter(([, byVersion]) => byVersion.size > 1)),
     firstPartyBytes: firstParty,
     foreignBytes: foreign,
     modules: [...modules.entries()].map(([path, value]) => ({ path, ...value })).sort((a, b) => b.bytes - a.bytes || a.path.localeCompare(b.path))
@@ -44258,7 +44109,7 @@ var ASCII = /^[\x00-\x7f]*$/;
 function utf8Length(text2) {
   return ASCII.test(text2) ? text2.length : Buffer.byteLength(text2, "utf8");
 }
-function attributeBytes(code, map2, mapDir = ".", isForeign) {
+function attributeBytes(code, map2, mapDir = ".", isForeign, versionOf) {
   const lines = code.split("\n");
   const decoded = decode3(map2.mappings);
   const sourceBytes = /* @__PURE__ */ new Map();
@@ -44281,8 +44132,17 @@ function attributeBytes(code, map2, mapDir = ".", isForeign) {
         sourceBytes.set(sourceIndex, (sourceBytes.get(sourceIndex) ?? 0) + bytes2);
     }
   }
-  const { foreignBytes, ...classified } = classifySources(sourceBytes, map2, mapDir, isForeign);
+  const { foreignBytes, ...classified } = classifySources(sourceBytes, map2, mapDir, isForeign, versionOf);
   return { ...classified, unattributedBytes: unattributed + foreignBytes };
+}
+function packageBytes(attribution) {
+  return [...attribution.packages.entries()].map(([name, bytes2]) => {
+    const byVersion = attribution.versions.get(name);
+    if (byVersion === void 0)
+      return { name, bytes: bytes2 };
+    const versions2 = [...byVersion.entries()].map(([version3, versionBytes]) => ({ version: version3, bytes: versionBytes })).sort((a, b) => b.bytes - a.bytes || a.version.localeCompare(b.version));
+    return { name, bytes: bytes2, versions: versions2 };
+  }).sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
 }
 
 // ../measure/dist/foreign.js
@@ -44295,11 +44155,151 @@ async function foreignSources(map2, mapDir, appDir, appPath) {
     if (!path.startsWith("../") || packageOf(path) !== void 0)
       continue;
     const outside = appPath !== void 0 && isOutsideRepository(path, appPath);
-    if (outside || await stat2(join6(appDir, path)).catch(() => void 0) === void 0) {
+    if (outside || await stat2(join5(appDir, path)).catch(() => void 0) === void 0) {
       foreign.add(path);
     }
   }
   return (path) => foreign.has(path);
+}
+
+// ../measure/dist/react-router.js
+import { readFile as readFile4 } from "node:fs/promises";
+import { join as join6, posix as posix3 } from "node:path";
+var MANIFEST_FILE = /^manifest-[\w-]{1,64}\.js$/;
+var MANIFEST_PREFIX = "window.__reactRouterManifest=";
+var MAX_ROUTES = 5e3;
+var MAX_DEPTH = 64;
+var strings = (value) => Array.isArray(value) ? value.filter((v) => typeof v === "string") : [];
+function parseReactRouterManifest(text2) {
+  if (!text2.startsWith(MANIFEST_PREFIX))
+    return void 0;
+  const end = text2.lastIndexOf(";");
+  let json2;
+  try {
+    json2 = JSON.parse(text2.slice(MANIFEST_PREFIX.length, end === -1 ? void 0 : end));
+  } catch {
+    return void 0;
+  }
+  if (typeof json2 !== "object" || json2 === null)
+    return void 0;
+  const { entry, routes } = json2;
+  if (typeof entry !== "object" || entry === null)
+    return void 0;
+  if (typeof routes !== "object" || routes === null || Array.isArray(routes))
+    return void 0;
+  const entryFields = entry;
+  if (typeof entryFields["module"] !== "string")
+    return void 0;
+  const parsed = /* @__PURE__ */ new Map();
+  for (const [id, raw] of Object.entries(routes).slice(0, MAX_ROUTES)) {
+    if (typeof raw !== "object" || raw === null)
+      continue;
+    const route = raw;
+    if (typeof route["module"] !== "string")
+      continue;
+    parsed.set(id, {
+      id,
+      ...typeof route["parentId"] === "string" ? { parentId: route["parentId"] } : {},
+      ...typeof route["path"] === "string" ? { path: route["path"] } : {},
+      ...route["index"] === true ? { index: true } : {},
+      module: route["module"],
+      imports: strings(route["imports"]),
+      css: strings(route["css"])
+    });
+  }
+  return {
+    entry: {
+      module: entryFields["module"],
+      imports: strings(entryFields["imports"]),
+      css: strings(entryFields["css"])
+    },
+    routes: parsed
+  };
+}
+function manifestRoutes(manifest) {
+  const parents = new Set([...manifest.routes.values()].flatMap((route) => route.parentId === void 0 ? [] : [route.parentId]));
+  const pages = [];
+  for (const leaf of manifest.routes.values()) {
+    if (parents.has(leaf.id))
+      continue;
+    if (leaf.path === void 0 && leaf.index !== true && leaf.parentId !== void 0)
+      continue;
+    const chain = [];
+    for (let current = leaf; current !== void 0 && chain.length < MAX_DEPTH; current = current.parentId === void 0 ? void 0 : manifest.routes.get(current.parentId)) {
+      chain.unshift(current);
+    }
+    const segments = chain.flatMap((route) => (route.path ?? "").split("/").filter((segment) => segment !== ""));
+    pages.push({ route: `/${segments.join("/")}`, chain });
+  }
+  return pages;
+}
+async function reactRouterRoutes(outDir, keys) {
+  const files = new Set(keys.keys());
+  let manifest;
+  for (const file2 of [...files].filter((f) => MANIFEST_FILE.test(posix3.basename(f))).sort()) {
+    manifest = parseReactRouterManifest(await readFile4(join6(outDir, file2), "utf8"));
+    if (manifest !== void 0)
+      break;
+  }
+  if (manifest === void 0)
+    return void 0;
+  const entry = manifest.entry;
+  const byRoute = /* @__PURE__ */ new Map();
+  for (const { route, chain } of manifestRoutes(manifest)) {
+    const urls = [
+      entry.module,
+      ...entry.imports,
+      ...entry.css,
+      ...chain.flatMap((r) => [r.module, ...r.imports, ...r.css])
+    ];
+    const assets = byRoute.get(route) ?? /* @__PURE__ */ new Set();
+    for (const url2 of urls) {
+      const file2 = resolveUrl(url2, ".", files);
+      const key = file2 === void 0 ? void 0 : keys.get(file2);
+      if (key !== void 0)
+        assets.add(key);
+    }
+    byRoute.set(route, assets);
+  }
+  return [...byRoute].map(([route, assets]) => ({ route, assets: [...assets] })).sort((a, b) => a.route.localeCompare(b.route));
+}
+
+// ../measure/dist/versions.js
+import { readFile as readFile5 } from "node:fs/promises";
+import { join as join7, resolve as resolve2 } from "node:path";
+async function readVersion(directory) {
+  try {
+    const json2 = JSON.parse(await readFile5(join7(directory, "package.json"), "utf8"));
+    return isVersionText(json2.version) ? json2.version : void 0;
+  } catch {
+    return void 0;
+  }
+}
+async function installedVersions(map2, mapDir, appDir) {
+  const copies = /* @__PURE__ */ new Map();
+  for (const source of new Set(map2.sources)) {
+    if (source === null)
+      continue;
+    const copy = installRoot(source, map2.sourceRoot, mapDir);
+    if (copy === void 0)
+      continue;
+    const roots = copies.get(copy.name) ?? /* @__PURE__ */ new Map();
+    roots.set(copy.root, copy);
+    copies.set(copy.name, roots);
+  }
+  const versions2 = /* @__PURE__ */ new Map();
+  for (const roots of copies.values()) {
+    if (roots.size < 2)
+      continue;
+    for (const copy of roots.values()) {
+      if (pnpmVersion(copy) !== void 0)
+        continue;
+      const version3 = await readVersion(resolve2(appDir, copy.root));
+      if (version3 !== void 0)
+        versions2.set(copy.root, version3);
+    }
+  }
+  return (copy) => versions2.get(copy.root);
 }
 
 // ../measure/dist/web.js
@@ -44326,6 +44326,20 @@ var TYPES = {
   ".json": "json",
   ".wasm": "wasm"
 };
+var PRECOMPRESSED = /* @__PURE__ */ new Set([
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".gif",
+  ".webp",
+  ".avif",
+  ".woff",
+  ".woff2"
+]);
+function isPrecompressed(path) {
+  const dot = path.lastIndexOf(".");
+  return dot !== -1 && PRECOMPRESSED.has(path.slice(dot).toLowerCase());
+}
 function isShipped(path) {
   if (path.endsWith(".map"))
     return false;
@@ -44340,8 +44354,8 @@ function assetType(path) {
   return (dot === -1 ? void 0 : TYPES[path.slice(dot).toLowerCase()]) ?? "other";
 }
 async function listFiles(root) {
-  const entries2 = await readdir3(root, { recursive: true, withFileTypes: true });
-  return entries2.filter((entry) => entry.isFile()).map((entry) => relative2(root, join7(entry.parentPath, entry.name)).split(sep2).join("/")).sort();
+  const entries2 = await readdir2(root, { recursive: true, withFileTypes: true });
+  return entries2.filter((entry) => entry.isFile()).map((entry) => relative(root, join8(entry.parentPath, entry.name)).split(sep).join("/")).sort();
 }
 var MIN_WARN_BYTES = 1024;
 var SOURCE_MAPPING_URL = /\/[/*][#@]\s*sourceMappingURL=([^\s*]+)\s*(?:\*\/)?\s*$/;
@@ -44354,13 +44368,13 @@ async function findSourceMap(outDir, file2, code, files) {
     return { map: parseSourceMap(Buffer.from(base643, "base64").toString("utf8")), mapFile: file2 };
   }
   const candidates = [
-    ...url2 === void 0 ? [] : [posix3.normalize(posix3.join(posix3.dirname(file2), url2))],
+    ...url2 === void 0 ? [] : [posix4.normalize(posix4.join(posix4.dirname(file2), url2))],
     `${file2}.map`
   ];
   for (const candidate of candidates) {
     if (files.has(candidate)) {
       return {
-        map: parseSourceMap(await readFile4(join7(outDir, candidate), "utf8")),
+        map: parseSourceMap(await readFile6(join8(outDir, candidate), "utf8")),
         mapFile: candidate
       };
     }
@@ -44371,38 +44385,38 @@ async function scanOutputDir(options) {
   const all = await listFiles(options.outDir);
   const fileSet = new Set(all);
   const shipped = all.filter(isShipped);
-  const sizes = await Promise.all(shipped.map(async (path) => ({ path, size: (await stat3(join7(options.outDir, path))).size })));
+  const sizes = await Promise.all(shipped.map(async (path) => ({ path, size: (await stat3(join8(options.outDir, path))).size })));
   const keys = assignKeys(sizes);
   const warnings = [];
   const maxModules = options.maxModules ?? 100;
-  const outRelative = relative2(options.appDir, options.outDir).split(sep2).join("/") || ".";
+  const outRelative = relative(options.appDir, options.outDir).split(sep).join("/") || ".";
   const assets = [];
   for (const path of shipped) {
-    const content = await readFile4(join7(options.outDir, path));
+    const content = await readFile6(join8(options.outDir, path));
     const type = assetType(path);
-    const size = compressedSize(content);
-    const asset = {
+    const asset = isPrecompressed(path) ? { key: keys.get(path) ?? path, file: path, type, raw: content.byteLength } : (({ raw, gzip, brotli }) => ({
       key: keys.get(path) ?? path,
       file: path,
       type,
-      raw: size.raw,
-      gzip: size.gzip,
-      brotli: size.brotli
-    };
+      raw,
+      gzip,
+      brotli
+    }))(compressedSize(content));
     if (type === "js") {
       const code = content.toString("utf8");
       try {
         const found = await findSourceMap(options.outDir, path, code, fileSet);
-        if (found === void 0 && content.byteLength >= MIN_WARN_BYTES) {
+        if (found === void 0 && content.byteLength >= MIN_WARN_BYTES && !code.startsWith(MANIFEST_PREFIX)) {
           warnings.push({
             file: path,
             message: "no source map found; packages and modules are not attributed"
           });
         } else if (found !== void 0) {
-          const mapDir = posix3.normalize(posix3.join(outRelative, posix3.dirname(found.mapFile)));
+          const mapDir = posix4.normalize(posix4.join(outRelative, posix4.dirname(found.mapFile)));
           const isForeign = await foreignSources(found.map, mapDir, options.appDir, options.appPath);
-          const attribution = attributeBytes(code, found.map, mapDir, isForeign);
-          asset.packages = [...attribution.packages.entries()].map(([name, bytes2]) => ({ name, bytes: bytes2 })).sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
+          const versionOf = await installedVersions(found.map, mapDir, options.appDir);
+          const attribution = attributeBytes(code, found.map, mapDir, isForeign, versionOf);
+          asset.packages = packageBytes(attribution);
           asset.firstPartyBytes = attribution.firstPartyBytes;
           asset.unattributedBytes = attribution.unattributedBytes;
           asset.modules = attribution.modules.slice(0, maxModules);
@@ -44429,7 +44443,7 @@ function entryRoute(src) {
 async function viteRoutes(outDir, keys) {
   let manifest;
   try {
-    manifest = JSON.parse(await readFile4(join7(outDir, ".vite", "manifest.json"), "utf8"));
+    manifest = JSON.parse(await readFile6(join8(outDir, ".vite", "manifest.json"), "utf8"));
   } catch (error62) {
     if (error62.code === "ENOENT")
       return void 0;
@@ -44447,6 +44461,9 @@ async function viteRoutes(outDir, keys) {
       files.add(current.file);
       for (const css of current.css ?? [])
         files.add(css);
+      for (const asset of current.assets ?? [])
+        if (assetType(asset) === "image")
+          files.add(asset);
       for (const imported of current.imports ?? [])
         visit2(imported);
     };
@@ -44464,7 +44481,23 @@ async function measureWebApp(options) {
     appDir: options.appDir,
     appPath: options.path
   });
-  const routes = options.framework === "vite" ? await viteRoutes(options.outDir, scan.keys) : void 0;
+  const found = options.framework === "vite" ? await viteRoutes(options.outDir, scan.keys) : options.framework === "react-router" ? await reactRouterRoutes(options.outDir, scan.keys) ?? await htmlRoutes(options.outDir, scan.keys) : options.framework === "astro" || options.framework === "sveltekit" || options.framework === "nuxt" || // One HTML page per entry (html-rspack-plugin); without HTML there are no routes.
+  options.framework === "rsbuild" || options.framework === "rspack" ? await htmlRoutes(options.outDir, scan.keys) : void 0;
+  const pages = /* @__PURE__ */ new Map();
+  for (const file2 of scan.keys.keys()) {
+    if (!file2.endsWith(".html"))
+      continue;
+    pages.set(options.framework === "vite" ? entryRoute(file2) : pageRoute(file2), file2);
+  }
+  const routes = found === void 0 ? void 0 : await addRouteMedia(found, {
+    outDir: options.outDir,
+    keys: scan.keys,
+    pageOf: (route) => {
+      const other = route.endsWith("/") ? route.slice(0, -1) : `${route}/`;
+      const file2 = pages.get(route) ?? pages.get(other);
+      return file2 === void 0 ? void 0 : join8(options.outDir, file2);
+    }
+  });
   return {
     app: {
       id: options.id,
@@ -44480,7 +44513,817 @@ async function measureWebApp(options) {
   };
 }
 
+// ../measure/dist/route-media.js
+var MAX_URLS = 2e3;
+var MAX_STYLE_BLOCKS = 200;
+var MAX_ROUTE_ASSETS = 1e3;
+var MEDIA_TAGS = /* @__PURE__ */ new Set(["img", "link", "video"]);
+var MAX_URL = 2048;
+var isSpace = (char) => char === " " || char === "	" || char === "\n" || char === "\r" || char === "\f";
+function cssUrls(css) {
+  const urls = [];
+  const lower = css.toLowerCase();
+  let at = 0;
+  while (urls.length < MAX_URLS) {
+    const start = lower.indexOf("url(", at);
+    if (start === -1)
+      break;
+    let i = start + 4;
+    while (isSpace(css[i]))
+      i += 1;
+    const quote = css[i];
+    if (quote === '"' || quote === "'") {
+      const end2 = css.indexOf(quote, i + 1);
+      if (end2 === -1)
+        break;
+      const value = css.slice(i + 1, end2);
+      if (value.length > 0 && value.length <= MAX_URL)
+        urls.push(value);
+      at = end2 + 1;
+      continue;
+    }
+    let end = i;
+    while (end < css.length && end - i <= MAX_URL) {
+      const char = css[end];
+      if (char === ")" || char === "(" || char === '"' || char === "'" || isSpace(char))
+        break;
+      end += 1;
+    }
+    let after = end;
+    while (isSpace(css[after]))
+      after += 1;
+    if (css[after] === ")" && end > i && end - i <= MAX_URL)
+      urls.push(css.slice(i, end));
+    at = Math.max(end, start + 4);
+  }
+  return urls;
+}
+function stylesheetMediaUrls(css) {
+  const urls = [];
+  let rest = "";
+  let at = 0;
+  for (; ; ) {
+    const start = css.indexOf("@font-face", at);
+    if (start === -1)
+      break;
+    const open3 = css.indexOf("{", start);
+    const close = open3 === -1 ? -1 : css.indexOf("}", open3);
+    if (close === -1)
+      break;
+    rest += css.slice(at, start);
+    const block = css.slice(open3 + 1, close);
+    const src = /(?:^|[;\s])src\s*:/i.exec(block);
+    const first = src === null ? void 0 : cssUrls(block.slice(src.index))[0];
+    if (first !== void 0)
+      urls.push(first);
+    at = close + 1;
+  }
+  rest += css.slice(at);
+  return [...urls, ...cssUrls(rest)].slice(0, MAX_URLS);
+}
+function pageMediaUrls(html) {
+  const urls = [];
+  for (const [tag, attributes] of htmlTags(html, MEDIA_TAGS)) {
+    if (tag === "img") {
+      const src = attribute(attributes, "src") ?? attribute(attributes, "srcset")?.trim().split(/[\s,]/)[0];
+      if (src !== void 0 && src !== "")
+        urls.push(src);
+    } else if (tag === "video") {
+      const poster = attribute(attributes, "poster");
+      if (poster !== void 0)
+        urls.push(poster);
+    } else {
+      const rel = (attribute(attributes, "rel") ?? "").toLowerCase().split(/\s+/);
+      const as = (attribute(attributes, "as") ?? "").toLowerCase();
+      const media = rel.includes("icon") || rel.includes("apple-touch-icon") || rel.includes("preload") && (as === "image" || as === "font");
+      const href = media ? attribute(attributes, "href") : void 0;
+      if (href !== void 0)
+        urls.push(href);
+    }
+    if (urls.length >= MAX_URLS)
+      return urls;
+  }
+  const lower = html.toLowerCase();
+  let at = 0;
+  for (let blocks = 0; blocks < MAX_STYLE_BLOCKS; blocks += 1) {
+    const start = lower.indexOf("<style", at);
+    if (start === -1)
+      break;
+    const open3 = html.indexOf(">", start);
+    const close = open3 === -1 ? -1 : lower.indexOf("</style", open3);
+    if (close === -1)
+      break;
+    urls.push(...stylesheetMediaUrls(html.slice(open3 + 1, close)));
+    at = close;
+  }
+  return urls.slice(0, MAX_URLS);
+}
+var isMedia = (file2) => {
+  const type = assetType(file2);
+  return type === "image" || type === "font";
+};
+async function addRouteMedia(routes, options) {
+  const files = new Set(options.keys.keys());
+  const fileOf = new Map([...options.keys].map(([file2, key]) => [key, file2]));
+  const fromStylesheet = /* @__PURE__ */ new Map();
+  const stylesheetMedia = async (file2) => {
+    const cached2 = fromStylesheet.get(file2);
+    if (cached2 !== void 0)
+      return cached2;
+    const css = await readFile7(join9(options.outDir, file2), "utf8");
+    const found = stylesheetMediaUrls(css).map((url2) => resolveUrl(url2, posix5.dirname(file2), files)).filter((target) => target !== void 0 && isMedia(target));
+    fromStylesheet.set(file2, found);
+    return found;
+  };
+  const result = [];
+  for (const route of routes) {
+    const media = /* @__PURE__ */ new Set();
+    for (const key of route.assets) {
+      const file2 = fileOf.get(key);
+      if (file2 !== void 0 && assetType(file2) === "css") {
+        for (const target of await stylesheetMedia(file2))
+          media.add(target);
+      }
+    }
+    const page = options.pageOf?.(route.route);
+    if (page !== void 0) {
+      const html = await readFile7(page, "utf8");
+      const dir = posix5.dirname(relative2(options.outDir, page).split(sep2).join("/"));
+      for (const url2 of pageMediaUrls(html)) {
+        const target = resolveUrl(url2, dir, files);
+        if (target !== void 0 && isMedia(target))
+          media.add(target);
+      }
+    }
+    const added = [...media].map((file2) => options.keys.get(file2)).filter((key) => key !== void 0 && !route.assets.includes(key));
+    added.splice(Math.max(0, MAX_ROUTE_ASSETS - route.assets.length));
+    result.push(added.length === 0 ? route : { ...route, assets: [...route.assets, ...added] });
+  }
+  return result;
+}
+
+// ../measure/dist/git.js
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+var run = promisify(execFile);
+async function git(cwd, args) {
+  try {
+    const { stdout } = await run("git", args, { cwd, timeout: 1e4 });
+    return stdout.trim();
+  } catch {
+    return void 0;
+  }
+}
+function gitRoot(dir) {
+  return git(dir, ["rev-parse", "--show-toplevel"]);
+}
+function gitHead(dir) {
+  return git(dir, ["rev-parse", "HEAD"]);
+}
+
+// ../measure/dist/lockfile/index.js
+import { readFile as readFile8, readdir as readdir3 } from "node:fs/promises";
+import { dirname, join as join10, relative as relative3, resolve as resolve5, sep as sep3 } from "node:path";
+
+// ../measure/dist/lockfile/graph.js
+var LockfileError = class extends Error {
+  name = "LockfileError";
+};
+var MAX_VIA = 3;
+var MAX_CHAIN = 10;
+function shorter(candidate, current) {
+  if (current === void 0)
+    return true;
+  if (candidate.length !== current.length)
+    return candidate.length < current.length;
+  return candidate.join("\0") < current.join("\0");
+}
+function dependenciesOf(graph, importerPath) {
+  const importer = graph.importers.get(importerPath);
+  if (importer === void 0) {
+    throw new LockfileError(`the lockfile has no entry for "${importerPath}"`);
+  }
+  const found = /* @__PURE__ */ new Map();
+  const walk = (start, root, prod) => {
+    const queue = [
+      { id: start, depth: 0, path: [] }
+    ];
+    const seen = /* @__PURE__ */ new Set();
+    while (queue.length > 0) {
+      const item = queue.shift();
+      if (seen.has(item.id))
+        continue;
+      seen.add(item.id);
+      const node2 = graph.nodes.get(item.id);
+      if (node2 === void 0)
+        continue;
+      if (node2.workspace === void 0) {
+        const key = `${node2.name}@${node2.version}`;
+        const acc = found.get(key) ?? {
+          name: node2.name,
+          version: node2.version,
+          direct: false,
+          prod: false,
+          via: /* @__PURE__ */ new Set()
+        };
+        if (item.depth === 0)
+          acc.direct = true;
+        else {
+          if (acc.via.size < MAX_VIA)
+            acc.via.add(root);
+          if (shorter(item.path, acc.chain))
+            acc.chain = item.path;
+        }
+        if (prod)
+          acc.prod = true;
+        found.set(key, acc);
+      }
+      const path = item.depth === 0 ? [root] : [...item.path, node2.name];
+      for (const child of node2.deps)
+        queue.push({ id: child, depth: item.depth + 1, path });
+    }
+  };
+  for (const dep of importer.prod)
+    walk(dep.id, dep.name, true);
+  for (const dep of importer.dev)
+    walk(dep.id, dep.name, false);
+  return [...found.values()].map((acc) => ({
+    name: acc.name,
+    version: acc.version,
+    direct: acc.direct,
+    ...acc.prod ? {} : { dev: true },
+    ...acc.direct || acc.via.size === 0 ? {} : { via: [...acc.via].sort() },
+    ...!acc.direct && acc.chain !== void 0 && acc.chain.length > 1 && acc.chain.length <= MAX_CHAIN ? { chain: [...acc.chain] } : {}
+  })).sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
+}
+
+// ../measure/dist/lockfile/bun.js
+function stripTrailingCommas(text2) {
+  let out = "";
+  let inString = false;
+  for (let i = 0; i < text2.length; i += 1) {
+    const char = text2[i];
+    if (inString) {
+      out += char;
+      if (char === "\\") {
+        out += text2[i + 1] ?? "";
+        i += 1;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+    } else if (char === ",") {
+      let j = i + 1;
+      while (j < text2.length && /\s/.test(text2[j]))
+        j += 1;
+      if (text2[j] === "}" || text2[j] === "]")
+        continue;
+    }
+    out += char;
+  }
+  return out;
+}
+function keySegments(key) {
+  const parts = key.split("/");
+  const segments = [];
+  for (let i = 0; i < parts.length; i += 1) {
+    const part = parts[i];
+    if (part.startsWith("@") && i + 1 < parts.length) {
+      segments.push(`${part}/${parts[i + 1]}`);
+      i += 1;
+    } else {
+      segments.push(part);
+    }
+  }
+  return segments;
+}
+function parseResolution(resolution) {
+  const at = resolution.indexOf("@", 1);
+  if (at === -1)
+    return { name: resolution, version: "" };
+  return { name: resolution.slice(0, at), version: resolution.slice(at + 1) };
+}
+function resolutionOf(entry) {
+  const first = entry?.[0];
+  return typeof first === "string" ? first : "";
+}
+function resolve3(packages, scope, name) {
+  const segments = scope === "" ? [] : keySegments(scope);
+  for (let length = segments.length; length >= 0; length -= 1) {
+    const candidate = [...segments.slice(0, length), name].join("/");
+    if (candidate in packages)
+      return candidate;
+  }
+  return void 0;
+}
+function parseBunLock(text2) {
+  let lock;
+  try {
+    lock = JSON.parse(stripTrailingCommas(text2));
+  } catch {
+    throw new LockfileError("bun.lock is not valid JSON");
+  }
+  if (lock.workspaces === void 0 || lock.packages === void 0) {
+    throw new LockfileError('unsupported bun.lock: "workspaces" and "packages" are required');
+  }
+  const packages = lock.packages;
+  const workspaces = lock.workspaces;
+  const workspaceKey = /* @__PURE__ */ new Map([["", ""]]);
+  for (const [key, entry] of Object.entries(packages)) {
+    const { version: version3 } = parseResolution(resolutionOf(entry));
+    if (version3.startsWith("workspace:"))
+      workspaceKey.set(version3.slice("workspace:".length), key);
+  }
+  const nodeId = (key) => {
+    const { version: version3 } = parseResolution(resolutionOf(packages[key]));
+    return version3.startsWith("workspace:") ? `workspace:${version3.slice(10)}` : key;
+  };
+  const resolveId = (scope, name) => {
+    const key = resolve3(packages, scope, name);
+    return key === void 0 ? void 0 : nodeId(key);
+  };
+  const nodes = /* @__PURE__ */ new Map();
+  const importers = /* @__PURE__ */ new Map();
+  for (const [key, entry] of Object.entries(packages)) {
+    const { name, version: version3 } = parseResolution(resolutionOf(entry));
+    if (version3.startsWith("workspace:"))
+      continue;
+    const info = entry.find((item, index) => index > 0 && typeof item === "object") ?? {};
+    const runtime = {
+      ...info.dependencies,
+      ...info.optionalDependencies,
+      ...info.peerDependencies
+    };
+    nodes.set(key, {
+      name,
+      version: version3,
+      deps: Object.keys(runtime).flatMap((dep) => resolveId(key, dep) ?? [])
+    });
+  }
+  for (const [path, workspace] of Object.entries(workspaces)) {
+    const scope = workspaceKey.get(path) ?? "";
+    const list = (record2) => Object.keys(record2 ?? {}).flatMap((dep) => {
+      const id = resolveId(scope, dep);
+      return id === void 0 ? [] : [{ name: dep, id }];
+    });
+    const prod = list({
+      ...workspace.dependencies,
+      ...workspace.optionalDependencies,
+      ...workspace.peerDependencies
+    });
+    const importerPath = path === "" ? "." : path;
+    nodes.set(`workspace:${path}`, {
+      name: workspace.name ?? importerPath,
+      version: workspace.version ?? "0.0.0",
+      workspace: importerPath,
+      deps: prod.map((d) => d.id)
+    });
+    importers.set(importerPath, { prod, dev: list(workspace.devDependencies) });
+  }
+  return { format: "bun", importers, nodes };
+}
+
+// ../measure/dist/lockfile/npm.js
+var MARKER = "node_modules/";
+function nameFromLocation(location) {
+  const index = location.lastIndexOf(MARKER);
+  return index === -1 ? location : location.slice(index + MARKER.length);
+}
+function resolve4(packages, from, name) {
+  const segments = from === "" ? [] : from.split("/");
+  for (let length = segments.length; length >= 0; length -= 1) {
+    if (length > 0 && segments[length - 1] === "node_modules")
+      continue;
+    const prefix = segments.slice(0, length).join("/");
+    const candidate = prefix === "" ? `${MARKER}${name}` : `${prefix}/${MARKER}${name}`;
+    if (candidate in packages)
+      return candidate;
+  }
+  return void 0;
+}
+function parseNpmLock(text2) {
+  let lock;
+  try {
+    lock = JSON.parse(text2);
+  } catch {
+    throw new LockfileError("package-lock.json is not valid JSON");
+  }
+  if (lock.packages === void 0 || (lock.lockfileVersion ?? 0) < 2) {
+    throw new LockfileError("unsupported package-lock.json: lockfile version 2 or 3 is required (npm 7+)");
+  }
+  const packages = lock.packages;
+  const nodes = /* @__PURE__ */ new Map();
+  const importers = /* @__PURE__ */ new Map();
+  const target = (location) => {
+    const entry = packages[location];
+    return entry?.link === true && entry.resolved !== void 0 ? entry.resolved : location;
+  };
+  for (const [location, entry] of Object.entries(packages)) {
+    if (entry.link === true)
+      continue;
+    const runtime = {
+      ...entry.dependencies,
+      ...entry.optionalDependencies,
+      ...entry.peerDependencies
+    };
+    const deps = Object.keys(runtime).map((name) => resolve4(packages, location, name)).filter((id) => id !== void 0).map(target);
+    const isWorkspace = !location.includes(MARKER);
+    const path = location === "" ? "." : location;
+    nodes.set(location, {
+      name: entry.name ?? nameFromLocation(location),
+      version: entry.version ?? "0.0.0",
+      ...isWorkspace ? { workspace: path } : {},
+      deps
+    });
+    if (isWorkspace) {
+      const list = (record2) => Object.keys(record2 ?? {}).flatMap((name) => {
+        const id = resolve4(packages, location, name);
+        return id === void 0 ? [] : [{ name, id: target(id) }];
+      });
+      importers.set(path, {
+        prod: list({ ...entry.dependencies, ...entry.optionalDependencies }),
+        dev: list(entry.devDependencies)
+      });
+    }
+  }
+  return { format: "npm", importers, nodes };
+}
+
+// ../measure/dist/lockfile/pnpm.js
+var import_yaml2 = __toESM(require_dist(), 1);
+import { posix as posix6 } from "node:path";
+function stripPeers(version3) {
+  const paren = version3.indexOf("(");
+  return paren === -1 ? version3 : version3.slice(0, paren);
+}
+function splitKey(key) {
+  const clean2 = key.startsWith("/") ? key.slice(1) : key;
+  const base = stripPeers(clean2);
+  const at = base.lastIndexOf("@");
+  if (at <= 0)
+    throw new LockfileError(`unexpected pnpm package key "${key}"`);
+  return { name: base.slice(0, at), version: base.slice(at + 1) };
+}
+function parsePnpmLock(text2) {
+  const lock = (0, import_yaml2.parse)(text2);
+  const version3 = Number.parseFloat(String(lock?.lockfileVersion ?? ""));
+  if (lock === null || !(version3 >= 6 && version3 < 10)) {
+    throw new LockfileError(`unsupported pnpm lockfile version "${String(lock?.lockfileVersion)}" (6.x and 9.x are supported)`);
+  }
+  const v9 = version3 >= 9;
+  const graphSource = (v9 ? lock.snapshots : lock.packages) ?? {};
+  const prefix = v9 ? "" : "/";
+  const nodes = /* @__PURE__ */ new Map();
+  const ref = (name, versionRef, from) => {
+    if (versionRef.startsWith("link:")) {
+      return `workspace:${posix6.normalize(posix6.join(from, versionRef.slice(5)))}`;
+    }
+    const looksAliased = stripPeers(versionRef).slice(1).includes("@");
+    return looksAliased ? `${prefix}${versionRef}` : `${prefix}${name}@${versionRef}`;
+  };
+  for (const [key, snapshot] of Object.entries(graphSource)) {
+    const { name, version: resolved } = splitKey(key);
+    const deps = Object.entries({ ...snapshot.dependencies, ...snapshot.optionalDependencies }).map(([dep, v]) => ref(dep, v, "."));
+    nodes.set(key, { name, version: resolved, deps });
+  }
+  const importers = /* @__PURE__ */ new Map();
+  for (const [path, deps] of Object.entries(lock.importers ?? {})) {
+    const list = (record2) => Object.entries(record2 ?? {}).map(([name, value]) => ({
+      name,
+      id: ref(name, value.version, path)
+    }));
+    const prod = [...list(deps.dependencies), ...list(deps.optionalDependencies)];
+    const dev = list(deps.devDependencies);
+    importers.set(path, { prod, dev });
+    nodes.set(`workspace:${posix6.normalize(path)}`, {
+      name: path,
+      version: "0.0.0",
+      workspace: path,
+      deps: prod.map((dep) => dep.id)
+    });
+  }
+  return { format: "pnpm", importers, nodes };
+}
+
+// ../measure/dist/lockfile/yarn.js
+var import_yaml3 = __toESM(require_dist(), 1);
+function descriptorName(descriptor) {
+  const at = descriptor.indexOf("@", descriptor.startsWith("@") ? 1 : 0);
+  return at === -1 ? descriptor : descriptor.slice(0, at);
+}
+function unquote(text2) {
+  const trimmed = text2.trim();
+  return trimmed.startsWith('"') && trimmed.endsWith('"') ? trimmed.slice(1, -1) : trimmed;
+}
+function parseClassic(text2) {
+  const entries2 = /* @__PURE__ */ new Map();
+  let current;
+  let section;
+  for (const line of text2.split(/\r?\n/)) {
+    if (line.trim() === "" || line.startsWith("#"))
+      continue;
+    if (!line.startsWith(" ")) {
+      current = { version: "", dependencies: {} };
+      section = void 0;
+      const entry = current;
+      for (const descriptor of line.replace(/:$/, "").split(","))
+        entries2.set(unquote(descriptor), entry);
+      continue;
+    }
+    if (current === void 0)
+      throw new LockfileError("malformed yarn.lock: indented line before the first entry");
+    const indent = line.length - line.trimStart().length;
+    const content = line.trim();
+    if (indent === 2) {
+      section = content.endsWith(":") ? content.slice(0, -1) : void 0;
+      const version3 = /^version "?([^"]+)"?$/.exec(content);
+      if (version3?.[1] !== void 0)
+        current.version = version3[1];
+    } else if (indent === 4 && (section === "dependencies" || section === "optionalDependencies")) {
+      const space = content.lastIndexOf(" ");
+      current.dependencies[unquote(content.slice(0, space))] = unquote(content.slice(space + 1));
+    }
+  }
+  return entries2;
+}
+function parseBerry(text2) {
+  const doc = (0, import_yaml3.parse)(text2);
+  const entries2 = /* @__PURE__ */ new Map();
+  for (const [key, value] of Object.entries(doc ?? {})) {
+    if (key === "__metadata")
+      continue;
+    const entry = {
+      version: String(value.version ?? "0.0.0"),
+      ...value.resolution === void 0 ? {} : { resolution: value.resolution },
+      dependencies: { ...value.dependencies, ...value.optionalDependencies }
+    };
+    for (const descriptor of key.split(","))
+      entries2.set(descriptor.trim(), entry);
+  }
+  return entries2;
+}
+function parseYarnLock(text2, workspaces) {
+  const berry = /^__metadata:/m.test(text2);
+  const entries2 = berry ? parseBerry(text2) : parseClassic(text2);
+  const nodes = /* @__PURE__ */ new Map();
+  const ids = /* @__PURE__ */ new Map();
+  const workspaceByName = /* @__PURE__ */ new Map();
+  for (const workspace of workspaces) {
+    if (workspace.manifest.name !== void 0)
+      workspaceByName.set(workspace.manifest.name, workspace.path);
+  }
+  const idOf = (entry, descriptor) => {
+    const existing = ids.get(entry);
+    if (existing !== void 0)
+      return existing;
+    const workspace = /@workspace:(.+)$/.exec(entry.resolution ?? "")?.[1];
+    const id = workspace === void 0 ? `${descriptorName(descriptor)}@${entry.version}` : `workspace:${workspace}`;
+    ids.set(entry, id);
+    return id;
+  };
+  const lookup = (name, range) => {
+    const entry = entries2.get(`${name}@${range}`) ?? (berry ? void 0 : entries2.get(`${name}@npm:${range}`));
+    if (entry !== void 0)
+      return idOf(entry, `${name}@${range}`);
+    const workspace = workspaceByName.get(name);
+    return workspace === void 0 ? void 0 : `workspace:${workspace}`;
+  };
+  for (const [descriptor, entry] of entries2) {
+    const id = idOf(entry, descriptor);
+    if (nodes.has(id))
+      continue;
+    const workspace = id.startsWith("workspace:") ? id.slice("workspace:".length) : void 0;
+    const deps = Object.entries(entry.dependencies).map(([name, range]) => lookup(name, range)).filter((child) => child !== void 0);
+    nodes.set(id, {
+      name: descriptorName(descriptor),
+      version: entry.version,
+      ...workspace === void 0 ? {} : { workspace },
+      deps
+    });
+  }
+  const importers = /* @__PURE__ */ new Map();
+  for (const workspace of workspaces) {
+    const list = (record2) => Object.entries(record2 ?? {}).flatMap(([name, range]) => {
+      const id2 = lookup(name, berry && !range.includes(":") ? `npm:${range}` : range);
+      return id2 === void 0 ? [] : [{ name, id: id2 }];
+    });
+    const prod = list({
+      ...workspace.manifest.dependencies,
+      ...workspace.manifest.optionalDependencies
+    });
+    const dev = list(workspace.manifest.devDependencies);
+    importers.set(workspace.path, { prod, dev });
+    const id = `workspace:${workspace.path}`;
+    if (!nodes.has(id))
+      nodes.set(id, {
+        name: workspace.manifest.name ?? workspace.path,
+        version: "0.0.0",
+        workspace: workspace.path,
+        deps: prod.map((dep) => dep.id)
+      });
+  }
+  return { format: berry ? "yarn-berry" : "yarn-classic", importers, nodes };
+}
+
+// ../measure/dist/lockfile/index.js
+var LOCKFILES = [
+  "pnpm-lock.yaml",
+  "package-lock.json",
+  "npm-shrinkwrap.json",
+  "yarn.lock",
+  "bun.lock",
+  "bun.lockb"
+];
+async function findLockfile(startDir, stopDir) {
+  let dir = resolve5(startDir);
+  const stop2 = stopDir === void 0 ? void 0 : resolve5(stopDir);
+  for (; ; ) {
+    const names = new Set(await readdir3(dir).catch(() => []));
+    const name = LOCKFILES.find((candidate) => names.has(candidate));
+    if (name !== void 0)
+      return { path: join10(dir, name), name };
+    const parent = dirname(dir);
+    if (parent === dir || dir === stop2)
+      return void 0;
+    dir = parent;
+  }
+}
+async function expandWorkspaces(root, patterns) {
+  const result = /* @__PURE__ */ new Set();
+  for (const pattern of patterns) {
+    if (pattern.startsWith("!"))
+      continue;
+    if (pattern.endsWith("/*")) {
+      const base = pattern.slice(0, -2);
+      const entries2 = await readdir3(join10(root, base), { withFileTypes: true }).catch(() => []);
+      for (const entry of entries2)
+        if (entry.isDirectory())
+          result.add(`${base}/${entry.name}`);
+    } else if (!pattern.includes("*")) {
+      result.add(pattern.replace(/\/$/, ""));
+    }
+  }
+  return [...result].sort();
+}
+async function yarnWorkspaces(root) {
+  const manifest = await readPackageJson(root);
+  if (manifest === void 0)
+    throw new LockfileError(`no package.json next to ${join10(root, "yarn.lock")}`);
+  const declared = manifest.workspaces;
+  const patterns = declared === void 0 ? [] : "packages" in declared ? declared.packages ?? [] : declared;
+  const workspaces = [{ path: ".", manifest }];
+  for (const path of await expandWorkspaces(root, patterns)) {
+    const child = await readPackageJson(join10(root, path));
+    if (child !== void 0)
+      workspaces.push({ path, manifest: child });
+  }
+  return workspaces;
+}
+async function readLockGraph(location) {
+  const text2 = location.name === "bun.lockb" ? "" : await readFile8(location.path, "utf8");
+  switch (location.name) {
+    case "pnpm-lock.yaml":
+      return parsePnpmLock(text2);
+    case "package-lock.json":
+    case "npm-shrinkwrap.json":
+      return parseNpmLock(text2);
+    case "yarn.lock":
+      return parseYarnLock(text2, await yarnWorkspaces(dirname(location.path)));
+    case "bun.lock":
+      return parseBunLock(text2);
+    case "bun.lockb":
+      throw new LockfileError(`${location.path} is Bun's binary lockfile, which usertax cannot read: run \`bun install --save-text-lockfile\` to write bun.lock (the default since Bun 1.2)`);
+  }
+}
+async function readAppDependencies(appDir, stopDir) {
+  const lockfile = await findLockfile(appDir, stopDir);
+  if (lockfile === void 0)
+    return void 0;
+  const graph = await readLockGraph(lockfile);
+  const importer = relative3(dirname(lockfile.path), resolve5(appDir)).split(sep3).join("/") || ".";
+  return { lockfile, format: graph.format, dependencies: dependenciesOf(graph, importer) };
+}
+
+// ../measure/dist/lighthouse.js
+import { createRequire } from "node:module";
+import { join as join11 } from "node:path";
+import { pathToFileURL as pathToFileURL2 } from "node:url";
+var LighthouseError = class extends Error {
+  name = "LighthouseError";
+};
+var URL_AUDITS = [
+  "network-requests",
+  "bootup-time",
+  "unused-javascript",
+  "unminified-javascript"
+];
+var EXTENSION_URL = /^([a-z][a-z-]*-extension):\/\/([^/?#\s]{1,100})/i;
+function extensionContamination(lhr) {
+  const origins = /* @__PURE__ */ new Set();
+  const urls = /* @__PURE__ */ new Set();
+  for (const id of URL_AUDITS) {
+    for (const item of lhr.audits[id]?.details?.items ?? []) {
+      if (typeof item.url !== "string")
+        continue;
+      const match = EXTENSION_URL.exec(item.url);
+      if (match === null)
+        continue;
+      origins.add(`${match[1].toLowerCase()}://${match[2]}`);
+      urls.add(item.url);
+    }
+  }
+  if (origins.size === 0)
+    return void 0;
+  return { origins: [...origins].sort().slice(0, 20), requestCount: urls.size };
+}
+function runFromResult(lhr) {
+  if (lhr.runtimeError !== void 0) {
+    throw new LighthouseError(`Lighthouse failed: ${lhr.runtimeError.code ?? ""} ${lhr.runtimeError.message ?? ""}`.trim());
+  }
+  const score = lhr.categories.performance?.score;
+  const value = (id) => {
+    const audit = lhr.audits[id]?.numericValue;
+    if (audit === void 0 || !Number.isFinite(audit))
+      throw new LighthouseError(`Lighthouse result has no ${id}`);
+    return audit;
+  };
+  if (score === void 0 || score === null)
+    throw new LighthouseError("Lighthouse result has no performance score");
+  const contamination = extensionContamination(lhr);
+  return {
+    performance: Math.round(score * 100 * 10) / 10,
+    lcp: value("largest-contentful-paint"),
+    tbt: value("total-blocking-time"),
+    cls: value("cumulative-layout-shift"),
+    ...contamination === void 0 ? {} : { contamination }
+  };
+}
+async function load(name) {
+  try {
+    return await import(name);
+  } catch {
+  }
+  try {
+    const resolved = createRequire(join11(process.cwd(), "package.json")).resolve(name);
+    return await import(pathToFileURL2(resolved).href);
+  } catch {
+    throw new LighthouseError(`"${name}" is not installed. Lighthouse support needs the optional packages lighthouse and chrome-launcher: npm install -D lighthouse chrome-launcher`);
+  }
+}
+function pageKey(url2) {
+  const parsed = new URL(url2);
+  return `${parsed.pathname}${parsed.search}`;
+}
+async function runLighthouse(options) {
+  if (!Number.isInteger(options.runs) || options.runs < 1 || options.runs > 100) {
+    throw new LighthouseError("runs must be an integer between 1 and 100");
+  }
+  const warmup = options.warmup ?? 1;
+  if (!Number.isInteger(warmup) || warmup < 0 || warmup > 10) {
+    throw new LighthouseError("warmup must be an integer between 0 and 10");
+  }
+  const { default: lighthouse } = await load("lighthouse");
+  const launcher = await load("chrome-launcher");
+  const formFactor = options.formFactor ?? "mobile";
+  const config2 = formFactor === "desktop" ? (await load("lighthouse/core/config/desktop-config.js")).default : void 0;
+  const flags = ["--headless=new", "--disable-gpu", "--no-first-run"];
+  if (process.getuid?.() === 0)
+    flags.push("--no-sandbox");
+  const results = /* @__PURE__ */ new Map();
+  for (let run3 = 1 - warmup; run3 <= options.runs; run3 += 1) {
+    for (const url2 of options.urls) {
+      const chrome = await launcher.launch({
+        chromeFlags: flags,
+        ...options.chromePath === void 0 ? {} : { chromePath: options.chromePath }
+      });
+      try {
+        const result = await lighthouse(url2, { port: chrome.port, output: "json", logLevel: "error", onlyCategories: ["performance"] }, config2);
+        if (result === void 0)
+          throw new LighthouseError(`Lighthouse returned no result for ${url2}`);
+        const measured = runFromResult(result.lhr);
+        if (run3 < 1)
+          continue;
+        const entry = results.get(url2) ?? { version: result.lhr.lighthouseVersion, runs: [] };
+        entry.runs.push(measured);
+        results.set(url2, entry);
+        options.onRun?.(url2, run3, measured);
+      } finally {
+        await chrome.kill();
+      }
+    }
+  }
+  return options.urls.map((url2) => {
+    const entry = results.get(url2);
+    return { url: pageKey(url2), formFactor, lighthouseVersion: entry.version, runs: entry.runs };
+  });
+}
+
 // ../measure/dist/next.js
+import { readFile as readFile9, readdir as readdir4 } from "node:fs/promises";
+import { join as join12, relative as relative4, sep as sep4 } from "node:path";
 var STATIC_SEGMENT = "/_next/static/";
 var SPECIAL = /* @__PURE__ */ new Set([
   "_not-found",
@@ -44532,10 +45375,10 @@ function htmlAssets(html) {
     const text2 = tag[0];
     if (/\bnomodule\b/i.test(text2))
       continue;
-    const isScript = tag[1]?.toLowerCase() === "script";
+    const isScript2 = tag[1]?.toLowerCase() === "script";
     const isPreload = /\brel="(?:preload|modulepreload)"/i.test(text2) && /\bas="script"/i.test(text2);
     const isStylesheet = /\brel="stylesheet"/i.test(text2);
-    if (!isScript && !isPreload && !isStylesheet)
+    if (!isScript2 && !isPreload && !isStylesheet)
       continue;
     const url2 = /\b(?:src|href)="([^"]+)"/i.exec(text2)?.[1];
     const index = url2?.indexOf(STATIC_SEGMENT) ?? -1;
@@ -44554,12 +45397,29 @@ function htmlRoute(path) {
 }
 async function listRelative(root, suffix) {
   const entries2 = await readdir4(root, { recursive: true, withFileTypes: true }).catch(() => []);
-  return entries2.filter((entry) => entry.isFile() && entry.name.endsWith(suffix)).map((entry) => relative3(root, join8(entry.parentPath, entry.name)).split(sep3).join("/")).sort();
+  return entries2.filter((entry) => entry.isFile() && entry.name.endsWith(suffix)).map((entry) => relative4(root, join12(entry.parentPath, entry.name)).split(sep4).join("/")).sort();
 }
-async function manifestRoutes(serverApp, rootMainFiles, skip) {
+function manifestFiles(entries2) {
+  const files = [];
+  for (const list of Object.values(entries2 ?? {})) {
+    if (!Array.isArray(list))
+      continue;
+    for (const item of list) {
+      if (typeof item === "string")
+        files.push(item);
+      else if (typeof item === "object" && item !== null) {
+        const { path, inlined } = item;
+        if (typeof path === "string" && inlined !== true)
+          files.push(path);
+      }
+    }
+  }
+  return files;
+}
+async function manifestRoutes2(serverApp, rootMainFiles, skip) {
   const routes = [];
   for (const file2 of await listRelative(serverApp, "page_client-reference-manifest.js")) {
-    const text2 = await readFile5(join8(serverApp, file2), "utf8");
+    const text2 = await readFile9(join12(serverApp, file2), "utf8");
     const json2 = /=\s*(\{[\s\S]*\});?\s*$/.exec(text2)?.[1];
     if (json2 === void 0)
       continue;
@@ -44572,45 +45432,55 @@ async function manifestRoutes(serverApp, rootMainFiles, skip) {
     const route = htmlRoute(file2.replace(/\/?page_client-reference-manifest\.js$/, "") || "index");
     if (route === void 0 || skip.has(route))
       continue;
-    const entries2 = Object.values(manifest.entryJSFiles ?? {}).flat();
+    const entries2 = [
+      ...manifestFiles(manifest.entryJSFiles),
+      ...manifestFiles(manifest.entryCSSFiles)
+    ];
     const files = [...rootMainFiles, ...entries2].map((f) => f.replace(/^\/?(?:_next\/)?static\//, ""));
     routes.push({ route, files: [...new Set(files)] });
   }
   return routes;
 }
 async function measureNextApp(options) {
-  const staticDir = join8(options.outDir, "static");
+  const staticDir = join12(options.outDir, "static");
   const scan = await scanOutputDir({
     outDir: staticDir,
     appDir: options.appDir,
     appPath: options.path
   });
-  const buildId = (await readFile5(join8(options.outDir, "BUILD_ID"), "utf8").catch(() => "")).trim() || void 0;
+  const buildId = (await readFile9(join12(options.outDir, "BUILD_ID"), "utf8").catch(() => "")).trim() || void 0;
   const keys = nextKeys(scan.assets, buildId);
   const assets = scan.assets.map((asset) => ({ ...asset, key: keys.get(asset.file) ?? asset.key }));
   const keyOf = (file2) => keys.get(file2);
   const routes = [];
   const seen = /* @__PURE__ */ new Set();
+  const pages = /* @__PURE__ */ new Map();
   for (const dir of ["server/app", "server/pages"]) {
-    const root = join8(options.outDir, dir);
+    const root = join12(options.outDir, dir);
     for (const file2 of await listRelative(root, ".html")) {
       const route = htmlRoute(file2);
       if (route === void 0 || seen.has(route))
         continue;
       seen.add(route);
-      const html = await readFile5(join8(root, file2), "utf8");
+      pages.set(route, join12(root, file2));
+      const html = await readFile9(join12(root, file2), "utf8");
       routes.push({
         route,
         assets: htmlAssets(html).map(keyOf).filter((k) => k !== void 0)
       });
     }
   }
-  const buildManifest = JSON.parse(await readFile5(join8(options.outDir, "build-manifest.json"), "utf8").catch(() => "{}"));
+  const buildManifest = JSON.parse(await readFile9(join12(options.outDir, "build-manifest.json"), "utf8").catch(() => "{}"));
   const rootMain = (buildManifest.rootMainFiles ?? []).map((f) => f.replace(/^static\//, ""));
-  for (const { route, files } of await manifestRoutes(join8(options.outDir, "server/app"), rootMain, seen)) {
+  for (const { route, files } of await manifestRoutes2(join12(options.outDir, "server/app"), rootMain, seen)) {
     routes.push({ route, assets: files.map(keyOf).filter((k) => k !== void 0) });
   }
   routes.sort((a, b) => a.route.localeCompare(b.route));
+  const withMedia = await addRouteMedia(routes, {
+    outDir: staticDir,
+    keys: new Map(assets.map((asset) => [asset.file, asset.key])),
+    pageOf: (route) => pages.get(route)
+  });
   return {
     app: {
       id: options.id,
@@ -44619,7 +45489,7 @@ async function measureNextApp(options) {
       kind: "web",
       framework: "next",
       assets,
-      routes,
+      routes: withMedia,
       ...options.dependencies === void 0 ? {} : { dependencies: [...options.dependencies] }
     },
     warnings: scan.warnings
@@ -44627,9 +45497,9 @@ async function measureNextApp(options) {
 }
 
 // ../measure/dist/rn.js
-import { readFile as readFile6, readdir as readdir5 } from "node:fs/promises";
-import { join as join9, posix as posix4, relative as relative4, sep as sep4 } from "node:path";
-function attributeHermes(byteLength, map2, mapDir = ".", isForeign) {
+import { readFile as readFile10, readdir as readdir5 } from "node:fs/promises";
+import { join as join13, posix as posix7, relative as relative5, sep as sep5 } from "node:path";
+function attributeHermes(byteLength, map2, mapDir = ".", isForeign, versionOf) {
   const sourceBytes = /* @__PURE__ */ new Map();
   let attributed = 0;
   for (const line of decode3(map2.mappings)) {
@@ -44645,13 +45515,13 @@ function attributeHermes(byteLength, map2, mapDir = ".", isForeign) {
       attributed += span;
     }
   }
-  const { foreignBytes, ...classified } = classifySources(sourceBytes, map2, mapDir, isForeign);
+  const { foreignBytes, ...classified } = classifySources(sourceBytes, map2, mapDir, isForeign, versionOf);
   return { ...classified, unattributedBytes: byteLength - attributed + foreignBytes };
 }
 async function measureBundle(input2, appDir, maxModules = 100, appPath) {
-  const content = await readFile6(input2.file);
+  const content = await readFile10(input2.file);
   const hermes = isHermesBytecode(content);
-  const display = relative4(appDir, input2.file).split(sep4).join("/");
+  const display = relative5(appDir, input2.file).split(sep5).join("/");
   const bundle = {
     platform: input2.platform,
     file: display,
@@ -44663,7 +45533,7 @@ async function measureBundle(input2, appDir, maxModules = 100, appPath) {
   const mapFile = input2.map ?? `${input2.file}.map`;
   let map2;
   try {
-    map2 = parseSourceMap(await readFile6(mapFile, "utf8"));
+    map2 = parseSourceMap(await readFile10(mapFile, "utf8"));
   } catch (error62) {
     const missing = error62.code === "ENOENT";
     if (!missing && !(error62 instanceof SourceMapError))
@@ -44674,10 +45544,11 @@ async function measureBundle(input2, appDir, maxModules = 100, appPath) {
     });
   }
   if (map2 !== void 0) {
-    const mapDir = posix4.dirname(relative4(appDir, mapFile).split(sep4).join("/"));
+    const mapDir = posix7.dirname(relative5(appDir, mapFile).split(sep5).join("/"));
     const isForeign = await foreignSources(map2, mapDir, appDir, appPath);
-    const attribution = hermes ? attributeHermes(content.byteLength, map2, mapDir, isForeign) : attributeBytes(content.toString("utf8"), map2, mapDir, isForeign);
-    bundle.packages = [...attribution.packages.entries()].map(([name, bytes2]) => ({ name, bytes: bytes2 })).sort((a, b) => b.bytes - a.bytes || a.name.localeCompare(b.name));
+    const versionOf = await installedVersions(map2, mapDir, appDir);
+    const attribution = hermes ? attributeHermes(content.byteLength, map2, mapDir, isForeign, versionOf) : attributeBytes(content.toString("utf8"), map2, mapDir, isForeign, versionOf);
+    bundle.packages = packageBytes(attribution);
     bundle.firstPartyBytes = attribution.firstPartyBytes;
     bundle.unattributedBytes = attribution.unattributedBytes;
     bundle.modules = attribution.modules.slice(0, maxModules);
@@ -44687,11 +45558,11 @@ async function measureBundle(input2, appDir, maxModules = 100, appPath) {
 async function findExpoBundles(distDir) {
   const bundles = [];
   for (const platform2 of ["android", "ios"]) {
-    const dir = join9(distDir, "_expo", "static", "js", platform2);
+    const dir = join13(distDir, "_expo", "static", "js", platform2);
     const files = await readdir5(dir).catch(() => []);
     const bundle = files.filter((f) => /\.(hbc|js)$/.test(f)).sort()[0];
     if (bundle !== void 0)
-      bundles.push({ platform: platform2, file: join9(dir, bundle) });
+      bundles.push({ platform: platform2, file: join13(dir, bundle) });
   }
   return bundles;
 }
@@ -44736,7 +45607,7 @@ async function measureRnApp(options) {
 import { createReadStream } from "node:fs";
 import { stat as stat4 } from "node:fs/promises";
 import { createServer } from "node:http";
-import { extname, join as join10, normalize, sep as sep5 } from "node:path";
+import { extname, join as join14, normalize, sep as sep6 } from "node:path";
 import { createGzip } from "node:zlib";
 var TYPES2 = {
   ".html": "text/html; charset=utf-8",
@@ -44759,11 +45630,11 @@ var TYPES2 = {
 var COMPRESSIBLE = /^(text\/|application\/(json|javascript)|image\/svg)/;
 async function resolveFile(root, pathname) {
   const decoded = decodeURIComponent(pathname);
-  const relative6 = normalize(decoded).replace(/^([/\\])+/, "");
-  if (relative6.split(sep5).includes(".."))
+  const relative7 = normalize(decoded).replace(/^([/\\])+/, "");
+  if (relative7.split(sep6).includes(".."))
     return void 0;
-  const base = join10(root, relative6);
-  const candidates = decoded.endsWith("/") ? [join10(base, "index.html")] : [base, `${base}.html`, join10(base, "index.html")];
+  const base = join14(root, relative7);
+  const candidates = decoded.endsWith("/") ? [join14(base, "index.html")] : [base, `${base}.html`, join14(base, "index.html")];
   for (const candidate of candidates) {
     const info = await stat4(candidate).catch(() => void 0);
     if (info?.isFile() === true)
@@ -44792,11 +45663,11 @@ function serveStatic(root) {
       response.writeHead(400).end();
     });
   });
-  return new Promise((resolve11, reject) => {
+  return new Promise((resolve12, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
       const { port } = server.address();
-      resolve11({
+      resolve12({
         url: `http://127.0.0.1:${port}`,
         close: () => new Promise((done) => server.close(() => {
           done();
@@ -44810,18 +45681,18 @@ function serveStatic(root) {
 import { spawn } from "node:child_process";
 import { stat as stat5 } from "node:fs/promises";
 import { createServer as createServer2 } from "node:net";
-import { dirname as dirname2, join as join11, resolve as resolve5 } from "node:path";
+import { dirname as dirname2, join as join15, resolve as resolve6 } from "node:path";
 var ServerError = class extends Error {
   name = "ServerError";
 };
 function freePort() {
-  return new Promise((resolve11, reject) => {
+  return new Promise((resolve12, reject) => {
     const server = createServer2();
     server.once("error", reject);
     server.listen(0, "127.0.0.1", () => {
       const { port } = server.address();
       server.close(() => {
-        resolve11(port);
+        resolve12(port);
       });
     });
   });
@@ -44835,19 +45706,19 @@ async function waitForUrl(url2, timeoutMs, isAlive = () => true) {
       await fetch(url2, { signal: AbortSignal.timeout(2e3) });
       return;
     } catch {
-      await new Promise((resolve11) => setTimeout(resolve11, 250));
+      await new Promise((resolve12) => setTimeout(resolve12, 250));
     }
   }
   throw new ServerError(`${url2} did not answer within ${Math.round(timeoutMs / 1e3)} s`);
 }
 function stop(child) {
-  return new Promise((resolve11) => {
+  return new Promise((resolve12) => {
     if (child.exitCode !== null || child.pid === void 0) {
-      resolve11();
+      resolve12();
       return;
     }
     child.once("exit", () => {
-      resolve11();
+      resolve12();
     });
     try {
       process.kill(-child.pid, "SIGTERM");
@@ -44880,9 +45751,9 @@ function startCommand(command, cwd, url2, timeoutMs = 6e4) {
   return launch(command, [], { cwd, shell: true, url: url2, timeoutMs });
 }
 async function findNextBin(appDir) {
-  let dir = resolve5(appDir);
+  let dir = resolve6(appDir);
   for (; ; ) {
-    const candidate = join11(dir, "node_modules", "next", "dist", "bin", "next");
+    const candidate = join15(dir, "node_modules", "next", "dist", "bin", "next");
     if ((await stat5(candidate).catch(() => void 0))?.isFile() === true)
       return candidate;
     const parent = dirname2(dir);
@@ -44924,8 +45795,8 @@ function createReport(options) {
 import { parseArgs as parseArgs4 } from "node:util";
 
 // ../cli/dist/commands/diff.js
-import { readFile as readFile7, writeFile } from "node:fs/promises";
-import { resolve as resolve6 } from "node:path";
+import { readFile as readFile11, writeFile } from "node:fs/promises";
+import { resolve as resolve7 } from "node:path";
 import { parseArgs } from "node:util";
 
 // ../cli/dist/io.js
@@ -44959,7 +45830,7 @@ var COMPRESSIONS = /* @__PURE__ */ new Set(["gzip", "brotli", "raw"]);
 async function readReport(path, role) {
   let text2;
   try {
-    text2 = await readFile7(path, "utf8");
+    text2 = await readFile11(path, "utf8");
   } catch (error62) {
     const code = error62.code ?? "unknown error";
     throw new UsageError(`cannot read ${role} report ${path}: ${code}`);
@@ -45020,7 +45891,7 @@ async function diffCommand(argv, io) {
   const cwd = process.cwd();
   let config2;
   try {
-    config2 = (await loadConfig(await gitRoot(cwd) ?? cwd, values.config === void 0 ? void 0 : resolve6(cwd, values.config)))?.config;
+    config2 = (await loadConfig(await gitRoot(cwd) ?? cwd, values.config === void 0 ? void 0 : resolve7(cwd, values.config)))?.config;
   } catch (error62) {
     if (error62 instanceof ConfigError)
       throw new UsageError(error62.message);
@@ -45046,8 +45917,8 @@ async function diffCommand(argv, io) {
 }
 
 // ../cli/dist/commands/init.js
-import { mkdir, readFile as readFile8, readdir as readdir6, stat as stat6, writeFile as writeFile2 } from "node:fs/promises";
-import { dirname as dirname3, join as join12, resolve as resolve7 } from "node:path";
+import { mkdir, readFile as readFile12, readdir as readdir6, stat as stat6, writeFile as writeFile2 } from "node:fs/promises";
+import { dirname as dirname3, join as join16, resolve as resolve8 } from "node:path";
 import { parseArgs as parseArgs2 } from "node:util";
 var INIT_HELP = `Usage:
   usertax init [options]
@@ -45071,7 +45942,7 @@ var ACTIONS = {
   bun: "oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0",
   upload: "actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2",
   download: "actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2",
-  usertax: "omerozkilic/usertax-action@v0"
+  usertax: "omerozkilic/usertax-action@v0 # zizmor: ignore[unpinned-uses] pin a commit SHA to freeze the action"
 };
 async function detectPackageManager(root) {
   const names = new Set(await readdir6(root).catch(() => []));
@@ -45080,7 +45951,7 @@ async function detectPackageManager(root) {
   if (names.has("bun.lock") || names.has("bun.lockb"))
     return "bun";
   if (names.has("yarn.lock")) {
-    const lock = await readFile8(join12(root, "yarn.lock"), "utf8");
+    const lock = await readFile12(join16(root, "yarn.lock"), "utf8");
     return lock.includes("__metadata:") ? "yarn" : "yarn-classic";
   }
   return "npm";
@@ -45171,7 +46042,7 @@ function commentWorkflow() {
     "# Step 2 of 2: posts the comment from the default branch and reads the report as data.",
     "name: usertax comment",
     "on:",
-    "  workflow_run:",
+    "  workflow_run: # zizmor: ignore[dangerous-triggers] default-branch code only; the report is untrusted data",
     "    workflows: [usertax]",
     "    types: [completed]",
     "permissions:",
@@ -45201,7 +46072,17 @@ function commentWorkflow() {
     ""
   ].join("\n");
 }
-var WEB = /* @__PURE__ */ new Set(["vite", "next", "webpack"]);
+var WEB = /* @__PURE__ */ new Set([
+  "vite",
+  "next",
+  "react-router",
+  "nuxt",
+  "astro",
+  "sveltekit",
+  "webpack",
+  "rsbuild",
+  "rspack"
+]);
 var MOBILE = /* @__PURE__ */ new Set(["expo", "react-native"]);
 function starterConfig(apps) {
   const budgets = [];
@@ -45220,9 +46101,9 @@ function starterConfig(apps) {
 async function appNotes(root, apps) {
   const notes = [];
   const config2 = async (dir, prefix) => {
-    const files = await readdir6(join12(root, dir)).catch(() => []);
+    const files = await readdir6(join16(root, dir)).catch(() => []);
     const file2 = files.find((f) => f.startsWith(prefix) && /\.(?:[cm]?[jt]s)$/.test(f));
-    return file2 === void 0 ? void 0 : readFile8(join12(root, dir, file2), "utf8");
+    return file2 === void 0 ? void 0 : readFile12(join16(root, dir, file2), "utf8");
   };
   for (const app of apps) {
     const where = app.path === "." ? "the root app" : app.path;
@@ -45236,8 +46117,35 @@ async function appNotes(root, apps) {
       if (!text2.includes("productionBrowserSourceMaps")) {
         notes.push(`${where} (Next.js): set productionBrowserSourceMaps: true in next.config, for packages.`);
       }
+    } else if (app.framework === "react-router") {
+      const text2 = await config2(app.path, "vite.config.") ?? "";
+      if (!text2.includes("sourcemap")) {
+        notes.push(`${where} (React Router): set build.sourcemap to 'hidden' in vite.config, for packages.`);
+      }
+    } else if (app.framework === "nuxt") {
+      const text2 = await config2(app.path, "nuxt.config.") ?? "";
+      if (!text2.includes("sourcemap")) {
+        notes.push(`${where} (Nuxt): set sourcemap: { client: 'hidden' } in nuxt.config, for packages. Routes come from the prerendered pages (nuxt generate, or routeRules / nitro.prerender).`);
+      }
+    } else if (app.framework === "astro") {
+      const text2 = await config2(app.path, "astro.config.") ?? "";
+      if (!text2.includes("sourcemap")) {
+        notes.push(`${where} (Astro): set vite: { build: { sourcemap: 'hidden' } } in astro.config, for packages.`);
+      }
+    } else if (app.framework === "sveltekit") {
+      const text2 = await config2(app.path, "vite.config.") ?? "";
+      if (!text2.includes("sourcemap")) {
+        notes.push(`${where} (SvelteKit): set build.sourcemap to 'hidden' in vite.config, for packages. Routes need adapter-static, which writes the prerendered pages.`);
+      }
     } else if (app.framework === "webpack") {
       notes.push(`${where} (webpack): emit source maps (devtool: 'hidden-source-map').`);
+    } else if (app.framework === "rsbuild") {
+      const text2 = await config2(app.path, "rsbuild.config.") ?? "";
+      if (!text2.includes("sourceMap")) {
+        notes.push(`${where} (Rsbuild): set output.sourceMap to { js: 'hidden-source-map' } in rsbuild.config, for packages.`);
+      }
+    } else if (app.framework === "rspack") {
+      notes.push(`${where} (Rspack): emit source maps (devtool: 'hidden-source-map').`);
     } else if (app.framework === "expo") {
       notes.push(`${where} (Expo): the build must run \`npx expo export --source-maps\`, one platform at a time for reproducible bundles (--platform android, then ios).`);
     } else {
@@ -45250,11 +46158,11 @@ async function exists2(path) {
   return await stat6(path).catch(() => void 0) !== void 0;
 }
 async function defaultBranch(root) {
-  const remote = await readFile8(join12(root, ".git", "refs", "remotes", "origin", "HEAD"), "utf8").catch(() => "");
+  const remote = await readFile12(join16(root, ".git", "refs", "remotes", "origin", "HEAD"), "utf8").catch(() => "");
   const fromRemote = /^ref: refs\/remotes\/origin\/(.+)$/m.exec(remote)?.[1]?.trim();
   if (fromRemote !== void 0)
     return fromRemote;
-  const head = await readFile8(join12(root, ".git", "HEAD"), "utf8").catch(() => "");
+  const head = await readFile12(join16(root, ".git", "HEAD"), "utf8").catch(() => "");
   const current = /^ref: refs\/heads\/(.+)$/m.exec(head)?.[1]?.trim();
   return current === "master" ? "master" : "main";
 }
@@ -45277,7 +46185,7 @@ async function initCommand(argv, io, context) {
   }
   if (positionals.length > 0)
     throw new UsageError(`unexpected argument ${positionals[0] ?? ""}`);
-  const root = await gitRoot(context.cwd) ?? resolve7(context.cwd);
+  const root = await gitRoot(context.cwd) ?? resolve8(context.cwd);
   const manifest = await readPackageJson(root);
   if (manifest === void 0) {
     throw new UsageError(`no package.json at the repository root ${root}`);
@@ -45311,7 +46219,7 @@ async function initCommand(argv, io, context) {
   const written = [];
   const skipped = [];
   for (const file2 of files) {
-    const target = join12(root, file2.path);
+    const target = join16(root, file2.path);
     if (dryRun) {
       io.stdout(`--- ${file2.path}
 ${file2.content}
@@ -45351,7 +46259,7 @@ ${file2.content}
 
 // ../cli/dist/commands/measure.js
 import { stat as stat7, writeFile as writeFile3 } from "node:fs/promises";
-import { basename as basename2, relative as relative5, resolve as resolve8, sep as sep6 } from "node:path";
+import { basename as basename2, relative as relative6, resolve as resolve9, sep as sep7 } from "node:path";
 import { parseArgs as parseArgs3 } from "node:util";
 var MEASURE_HELP = `Usage:
   usertax measure [app-dir] [options]
@@ -45364,8 +46272,11 @@ app-dir, it measures that app; a matching entry in the configuration supplies it
 
 Options:
       --config <file>       Configuration file (default: usertax.config.* at the repository root)
-      --out-dir <dir>       Build output directory (default: dist, or .next for Next.js)
-      --framework <name>    vite, next, webpack, static, expo or react-native (default: detected from package.json)
+      --out-dir <dir>       Build output directory (default: dist; .next for Next.js; build for SvelteKit,
+                            or .svelte-kit/output/client without adapter-static; .output/public for Nuxt;
+                            build/client for React Router)
+      --framework <name>    vite, next, react-router, nuxt, astro, sveltekit, webpack, rsbuild, rspack,
+                            static, expo or react-native (default: detected from package.json)
       --id <id>             App id in the report (default: package name or folder name)
       --name <name>         Display name (default: the id)
       --sha <sha>           Commit SHA (default: $GITHUB_SHA or git rev-parse HEAD)
@@ -45391,19 +46302,34 @@ Lighthouse (web apps; needs the optional packages lighthouse and chrome-launcher
 
 Source maps are needed to attribute bytes to packages and modules. For Vite, set
 build.sourcemap to 'hidden' (maps are not shipped) and build.manifest to true (entries).
-For Next.js, set productionBrowserSourceMaps to true.
+For Next.js, set productionBrowserSourceMaps to true. For Astro, set vite.build.sourcemap to
+'hidden' in astro.config; for SvelteKit, set build.sourcemap to 'hidden' in vite.config; for
+Nuxt, set sourcemap.client to 'hidden' in nuxt.config; for React Router, set build.sourcemap to
+'hidden' in vite.config.
 `;
 var SUPPORTED = /* @__PURE__ */ new Set([
   "vite",
   "next",
+  "react-router",
+  "nuxt",
+  "astro",
+  "sveltekit",
   "webpack",
+  "rsbuild",
+  "rspack",
   "static",
   "expo",
   "react-native"
 ]);
 var FRAMEWORKS = /* @__PURE__ */ new Set([
   "vite",
+  "react-router",
+  "nuxt",
+  "astro",
+  "sveltekit",
   "webpack",
+  "rsbuild",
+  "rspack",
   "static",
   "next",
   "expo",
@@ -45417,11 +46343,11 @@ function parseBundle(value, cwd) {
   if (match?.[1] === void 0 || match[2] === void 0 || !PLATFORMS.has(match[1])) {
     throw new UsageError(`--bundle expects <android|ios>=<file>, received "${value}"`);
   }
-  return { platform: match[1], file: resolve8(cwd, match[2]) };
+  return { platform: match[1], file: resolve9(cwd, match[2]) };
 }
 function parseArchive(value, cwd) {
   const match = /^([\w.-]+)=(.+)$/.exec(value);
-  return match?.[1] !== void 0 && match[2] !== void 0 && !/\.(apk|aab|ipa)$/i.test(match[1]) ? { key: match[1], file: resolve8(cwd, match[2]) } : { file: resolve8(cwd, value) };
+  return match?.[1] !== void 0 && match[2] !== void 0 && !/\.(apk|aab|ipa)$/i.test(match[1]) ? { key: match[1], file: resolve9(cwd, match[2]) } : { file: resolve9(cwd, value) };
 }
 function appIdFrom(name, dir) {
   const raw = name ?? basename2(dir);
@@ -45429,7 +46355,7 @@ function appIdFrom(name, dir) {
   return id === "" ? "app" : id;
 }
 function specFromConfig(entry, root) {
-  const dir = resolve8(root, entry.path);
+  const dir = resolve9(root, entry.path);
   return {
     dir,
     id: entry.id,
@@ -45438,11 +46364,11 @@ function specFromConfig(entry, root) {
     outDir: entry.outDir,
     bundles: (entry.bundles ?? []).map((b) => ({
       platform: b.platform,
-      file: resolve8(dir, b.file),
-      ...b.map === void 0 ? {} : { map: resolve8(dir, b.map) }
+      file: resolve9(dir, b.file),
+      ...b.map === void 0 ? {} : { map: resolve9(dir, b.map) }
     })),
     archives: (entry.archives ?? []).map((a) => ({
-      file: resolve8(dir, a.file),
+      file: resolve9(dir, a.file),
       ...a.key === void 0 ? {} : { key: a.key }
     })),
     ...entry.lighthouse === void 0 ? {} : {
@@ -45481,7 +46407,7 @@ async function runPages(spec, app, framework, appDir, outDir, io) {
       warmup: spec.warmup,
       formFactor: spec.formFactor,
       onRun: (url2, run3, result) => {
-        io.stderr(`lighthouse ${new URL(url2).pathname} run ${run3}/${spec.runs}: performance ${result.performance}, LCP ${Math.round(result.lcp)} ms, TBT ${Math.round(result.tbt)} ms, CLS ${result.cls.toFixed(3)}
+        io.stderr(`lighthouse ${new URL(url2).pathname} run ${run3}/${spec.runs}: performance ${result.performance}, LCP ${Math.round(result.lcp)} ms, TBT ${Math.round(result.tbt)} ms, CLS ${result.cls.toFixed(3)}${result.contamination === void 0 ? "" : ` (browser extensions active: ${result.contamination.origins.join(", ")}; not comparable)`}
 `);
       }
     });
@@ -45492,6 +46418,9 @@ async function runPages(spec, app, framework, appDir, outDir, io) {
   } finally {
     await server.close();
   }
+}
+async function isDirectory(path) {
+  return (await stat7(path).catch(() => void 0))?.isDirectory() === true;
 }
 async function measureApp(spec, repoRoot, io, prefix) {
   const pkg = await readPackageJson(spec.dir);
@@ -45505,7 +46434,13 @@ async function measureApp(spec, repoRoot, io, prefix) {
   }
   if (mobile && spec.lighthouse !== void 0)
     throw new UsageError("--lighthouse is for web apps");
-  const outDir = resolve8(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? "dist");
+  let outDir = resolve9(spec.dir, spec.outDir ?? DEFAULT_OUT_DIR[framework] ?? "dist");
+  if (spec.outDir === void 0 && !await isDirectory(outDir)) {
+    for (const fallback of FALLBACK_OUT_DIRS[framework] ?? []) {
+      if (await isDirectory(resolve9(spec.dir, fallback)))
+        outDir = resolve9(spec.dir, fallback);
+    }
+  }
   const needsOutDir = !mobile || framework === "expo" && spec.bundles.length === 0;
   const outStat = needsOutDir ? await stat7(outDir).catch(() => void 0) : void 0;
   if (needsOutDir && !outStat?.isDirectory() && !(mobile && spec.archives.length > 0)) {
@@ -45514,7 +46449,7 @@ async function measureApp(spec, repoRoot, io, prefix) {
   if (framework === "react-native" && spec.bundles.length === 0 && spec.archives.length === 0) {
     throw new UsageError("pass --bundle <android|ios>=<file> and/or --archive <file> for a React Native app");
   }
-  const path = relative5(repoRoot, spec.dir).split(sep6).join("/") || ".";
+  const path = relative6(repoRoot, spec.dir).split(sep7).join("/") || ".";
   const id = spec.id ?? appIdFrom(pkg?.name, spec.dir);
   let lock;
   try {
@@ -45628,11 +46563,11 @@ async function measureCommand(argv, io, context) {
   }
   if (values.sha !== void 0 && !SHA.test(values.sha))
     throw new UsageError("--sha must be a full 40-character commit SHA");
-  const startDir = resolve8(context.cwd, positionals[0] ?? ".");
+  const startDir = resolve9(context.cwd, positionals[0] ?? ".");
   const repoRoot = await gitRoot(startDir) ?? (positionals[0] === void 0 ? startDir : context.cwd);
   let loaded;
   try {
-    loaded = await loadConfig(repoRoot, values.config === void 0 ? void 0 : resolve8(context.cwd, values.config));
+    loaded = await loadConfig(repoRoot, values.config === void 0 ? void 0 : resolve9(context.cwd, values.config));
   } catch (error62) {
     if (error62 instanceof ConfigError)
       throw new UsageError(error62.message);
@@ -45654,14 +46589,14 @@ async function measureCommand(argv, io, context) {
   };
   let specs;
   if (positionals[0] !== void 0) {
-    const entry = loaded?.config.apps?.find((app) => resolve8(repoRoot, app.path) === startDir);
+    const entry = loaded?.config.apps?.find((app) => resolve9(repoRoot, app.path) === startDir);
     specs = [flagSpec(startDir, entry === void 0 ? void 0 : specFromConfig(entry, repoRoot))];
   } else {
     const used = APP_FLAGS.filter((flag) => values[flag] !== void 0);
     const fromConfig = loaded?.config.apps?.map((entry) => specFromConfig(entry, repoRoot));
     const discovered = fromConfig === void 0 ? await discoverApps(repoRoot) : void 0;
     const candidates = fromConfig ?? (discovered ?? []).filter((app) => app.framework !== "react-native").map((app) => ({
-      dir: resolve8(repoRoot, app.path),
+      dir: resolve9(repoRoot, app.path),
       framework: app.framework,
       bundles: [],
       archives: []
@@ -45682,7 +46617,7 @@ async function measureCommand(argv, io, context) {
   const apps = [];
   const ids = /* @__PURE__ */ new Set();
   for (const spec of specs) {
-    const prefix = specs.length > 1 ? `${relative5(repoRoot, spec.dir) || "."}: ` : "";
+    const prefix = specs.length > 1 ? `${relative6(repoRoot, spec.dir) || "."}: ` : "";
     const app = await measureApp(spec, repoRoot, io, prefix);
     if (ids.has(app.id))
       throw new UsageError(`two apps have the id "${app.id}"; set distinct ids in usertax.config.json`);
@@ -45710,7 +46645,7 @@ async function measureCommand(argv, io, context) {
 // ../cli/dist/mcp.js
 import { mkdtemp, writeFile as writeFile4 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join as join13, resolve as resolve9 } from "node:path";
+import { join as join17, resolve as resolve10 } from "node:path";
 
 // ../../node_modules/.pnpm/zod@4.6.7/node_modules/zod/v3/helpers/util.js
 var util;
@@ -53217,7 +54152,7 @@ var Protocol = class {
           return;
         }
         const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
-        await new Promise((resolve11) => setTimeout(resolve11, pollInterval));
+        await new Promise((resolve12) => setTimeout(resolve12, pollInterval));
         options?.signal?.throwIfAborted();
       }
     } catch (error62) {
@@ -53234,7 +54169,7 @@ var Protocol = class {
    */
   request(request, resultSchema, options) {
     const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
-    return new Promise((resolve11, reject) => {
+    return new Promise((resolve12, reject) => {
       const earlyReject = (error62) => {
         reject(error62);
       };
@@ -53312,7 +54247,7 @@ var Protocol = class {
           if (!parseResult.success) {
             reject(parseResult.error);
           } else {
-            resolve11(parseResult.data);
+            resolve12(parseResult.data);
           }
         } catch (error62) {
           reject(error62);
@@ -53574,12 +54509,12 @@ var Protocol = class {
       }
     } catch {
     }
-    return new Promise((resolve11, reject) => {
+    return new Promise((resolve12, reject) => {
       if (signal.aborted) {
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
         return;
       }
-      const timeoutId = setTimeout(resolve11, interval);
+      const timeoutId = setTimeout(resolve12, interval);
       signal.addEventListener("abort", () => {
         clearTimeout(timeoutId);
         reject(new McpError(ErrorCode.InvalidRequest, "Request cancelled"));
@@ -54719,7 +55654,7 @@ var McpServer = class {
     let task = createTaskResult.task;
     const pollInterval = task.pollInterval ?? 5e3;
     while (task.status !== "completed" && task.status !== "failed" && task.status !== "cancelled") {
-      await new Promise((resolve11) => setTimeout(resolve11, pollInterval));
+      await new Promise((resolve12) => setTimeout(resolve12, pollInterval));
       const updatedTask = await extra.taskStore.getTask(taskId);
       if (!updatedTask) {
         throw new McpError(ErrorCode.InternalError, `Task ${taskId} not found during polling`);
@@ -55383,12 +56318,12 @@ var StdioServerTransport = class {
     this.onclose?.();
   }
   send(message2) {
-    return new Promise((resolve11) => {
+    return new Promise((resolve12) => {
       const json2 = serializeMessage(message2);
       if (this._stdout.write(json2)) {
-        resolve11();
+        resolve12();
       } else {
-        this._stdout.once("drain", resolve11);
+        this._stdout.once("drain", resolve12);
       }
     });
   }
@@ -55436,7 +56371,7 @@ function createMcpServer(options) {
   const server = new McpServer({ name: "usertax", version: options.version }, {
     instructions: "usertax measures what a change costs users: JavaScript per route, React Native bundles, APK/AAB/IPA size, and which npm packages cause it. Build the app first, call measure for the base and for the head, then compare. Numbers come from build output and source maps; do not estimate them."
   });
-  const path = (p) => resolve9(options.cwd, p);
+  const path = (p) => resolve10(options.cwd, p);
   server.registerTool("measure", {
     title: "Measure built apps",
     description: "Measures an already built app or repository (Vite, Next.js, webpack, static, Expo, React Native) and saves a usertax report. Returns the head values and the report path. Does not build anything and does not run Lighthouse.",
@@ -55445,7 +56380,20 @@ function createMcpServer(options) {
       output: external_exports.string().optional().describe("Where to save the report JSON (default: a new temporary file)"),
       config: external_exports.string().optional().describe("Configuration file (default: usertax.config.*)"),
       outDir: external_exports.string().optional().describe("Build output directory of a single app"),
-      framework: external_exports.enum(["vite", "next", "webpack", "static", "expo", "react-native"]).optional(),
+      framework: external_exports.enum([
+        "vite",
+        "next",
+        "react-router",
+        "nuxt",
+        "astro",
+        "sveltekit",
+        "webpack",
+        "rsbuild",
+        "rspack",
+        "static",
+        "expo",
+        "react-native"
+      ]).optional(),
       bundles: external_exports.array(external_exports.string()).optional().describe("React Native bundles as platform=file, e.g. android=dist/index.android.bundle"),
       archives: external_exports.array(external_exports.string()).optional().describe("APK, AAB or IPA files")
     },
@@ -55471,7 +56419,7 @@ function createMcpServer(options) {
     if (code !== EXIT.ok)
       return text(io.err() || `measure failed (exit ${String(code)})`, true);
     const report = parseReport(JSON.parse(io.out()));
-    const output2 = input2.output === void 0 ? join13(await mkdtemp(join13(tmpdir(), "usertax-mcp-")), "report.json") : path(input2.output);
+    const output2 = input2.output === void 0 ? join17(await mkdtemp(join17(tmpdir(), "usertax-mcp-")), "report.json") : path(input2.output);
     await writeFile4(output2, io.out());
     const warnings = io.err().trim();
     return text([
@@ -55583,7 +56531,7 @@ async function mcpCommand(argv, io, options, transport) {
 }
 
 // ../cli/dist/version.js
-var VERSION = true ? "0.2.0" : createRequire(import.meta.url)("../package.json").version;
+var VERSION = true ? "0.3.0" : createRequire(import.meta.url)("../package.json").version;
 
 // ../cli/dist/index.js
 var version2 = VERSION;
@@ -55667,7 +56615,7 @@ function global(argv, io) {
 // src/base.ts
 import { mkdtemp as mkdtemp2, rm, writeFile as writeFile5 } from "node:fs/promises";
 import { tmpdir as tmpdir2 } from "node:os";
-import { join as join14 } from "node:path";
+import { join as join18 } from "node:path";
 var BASE_ARTIFACT_PREFIX = "usertax-base-";
 var REPORT_FILE = "usertax-report.json";
 async function mergeBase(gh, baseRef, headSha) {
@@ -55692,9 +56640,9 @@ async function findBaseReport(gh, sha, maxAncestors = 20) {
       (a) => !a.expired && a.name === `${BASE_ARTIFACT_PREFIX}${candidate}`
     );
     if (artifact === void 0) continue;
-    const dir = await mkdtemp2(join14(tmpdir2(), "usertax-base-"));
+    const dir = await mkdtemp2(join18(tmpdir2(), "usertax-base-"));
     try {
-      const zip = join14(dir, "artifact.zip");
+      const zip = join18(dir, "artifact.zip");
       await writeFile5(zip, await gh.downloadArtifact(artifact.id));
       const report = parseReport(
         JSON.parse((await readZipFile(zip, REPORT_FILE)).toString("utf8"))
@@ -55919,17 +56867,17 @@ var BASE_EVENTS = /* @__PURE__ */ new Set(["push", "workflow_dispatch", "schedul
 async function readEvent(env) {
   const path = env["GITHUB_EVENT_PATH"];
   if (path === void 0 || path === "") return {};
-  return JSON.parse(await readFile9(path, "utf8"));
+  return JSON.parse(await readFile13(path, "utf8"));
 }
 function short(sha) {
   return sha.slice(0, 7);
 }
 async function measure(ctx) {
   const { env } = ctx.rt;
-  const output2 = resolve10(ctx.workdir, getInput(env, "report") ?? REPORT_FILE);
+  const output2 = resolve11(ctx.workdir, getInput(env, "report") ?? REPORT_FILE);
   const args = ["measure", "--output", output2];
   const config2 = getInput(env, "config");
-  if (config2 !== void 0) args.push("--config", resolve10(ctx.workdir, config2));
+  if (config2 !== void 0) args.push("--config", resolve11(ctx.workdir, config2));
   const pr = ctx.event["pull_request"];
   if (pr?.head?.sha !== void 0) {
     args.push("--sha", pr.head.sha, "--ref", `refs/pull/${String(pr.number)}/head`);
@@ -55965,12 +56913,12 @@ async function readHeadReport(path) {
     );
   if (info.size > MAX_REPORT_BYTES)
     throw new InputError(`head report ${path} is larger than ${MAX_REPORT_BYTES} bytes`);
-  return parseReport(JSON.parse(await readFile9(path, "utf8")));
+  return parseReport(JSON.parse(await readFile13(path, "utf8")));
 }
 async function loadTrustedConfig(ctx) {
   try {
     const file2 = getInput(ctx.rt.env, "config");
-    return (await loadConfig(ctx.workdir, file2 === void 0 ? void 0 : resolve10(ctx.workdir, file2)))?.config;
+    return (await loadConfig(ctx.workdir, file2 === void 0 ? void 0 : resolve11(ctx.workdir, file2)))?.config;
   } catch (error62) {
     if (error62 instanceof ConfigError) throw new InputError(error62.message);
     throw error62;
@@ -56052,7 +57000,7 @@ async function run2(rt) {
     const mode = getInput(rt.env, "mode") ?? "measure";
     const ctx = {
       rt,
-      workdir: resolve10(
+      workdir: resolve11(
         rt.env["GITHUB_WORKSPACE"] ?? process.cwd(),
         getInput(rt.env, "working-directory") ?? "."
       ),
@@ -56064,7 +57012,7 @@ async function run2(rt) {
         await measure(ctx);
         return 0;
       case "comment":
-        return await comment(ctx, resolve10(ctx.workdir, requireInput(rt.env, "head-report")));
+        return await comment(ctx, resolve11(ctx.workdir, requireInput(rt.env, "head-report")));
       case "all":
         return await comment(ctx, await measure(ctx));
       default:
